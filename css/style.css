@@ -384,6 +384,39 @@ h1.glitch { font-size: clamp(40px, 9vmin, 84px); letter-spacing: 0.06em; font-we
 .rules-panel::-webkit-scrollbar-track { background: rgba(0, 240, 255, 0.05); }
 .rules-panel::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); }
 
+/* ---------- сетевой режим ---------- */
+
+.net-row { display: flex; gap: 10px; }
+
+#net-code {
+  flex: 1; min-width: 0; padding: 10px 14px;
+  background: rgba(0, 240, 255, 0.03);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  color: var(--c-cyan);
+  font: inherit; font-size: 13px;
+  letter-spacing: 0.28em; text-transform: uppercase;
+}
+#net-code:focus {
+  outline: none; border-color: var(--c-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.25), inset 0 0 12px rgba(0, 240, 255, 0.06);
+}
+#net-code::placeholder { color: var(--c-dim); opacity: 0.55; letter-spacing: 0.18em; }
+
+#net-status {
+  min-height: 15px;
+  font-size: 11px; letter-spacing: 0.18em;
+  color: var(--c-cyan); opacity: 0.85;
+}
+#net-status.err { color: var(--c-magenta); }
+
+.net-copy { display: flex; gap: 10px; }
+.net-copy .btn-ghost { flex: 1; }
+
+#net-overlay-title.t-net {
+  color: var(--c-magenta);
+  text-shadow: 0 0 10px rgba(255, 43, 214, 0.8), 0 0 40px rgba(255, 43, 214, 0.4);
+}
+
 /* ---------- адаптивность ---------- */
 
 @media (max-width: 760px) {

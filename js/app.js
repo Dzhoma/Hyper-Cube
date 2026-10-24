@@ -3,7 +3,8 @@
 /*
  * Сборка приложения: локализация, меню, рендер, оверлеи, звук.
  * Логика матча живёт в модуле Match (js/match.js), ядро — в GameCore (js/game.js),
- * ИИ — в AI (js/ai.js). Здесь только UI-слой: DOM, таймеры, звуки, строки.
+ * ИИ — в AI (js/ai.js), сеть — в Session/Net (js/session.js, js/net.js).
+ * Здесь только UI-слой: DOM, таймеры, звуки, строки.
  */
 (() => {
   const N = 4; // гиперкуб 4×4×4×4 (ADR-0004)
@@ -24,6 +25,31 @@
       'opp.human.sub': 'hot-seat · 2 players',
       'opp.ai': 'AI',
       'opp.ai.sub': 'play against the machine',
+      'menu.field.net': 'CONNECTION:',
+      'opp.online': 'ONLINE',
+      'opp.online.sub': 'p2p · direct webrtc link',
+      'net.role.host': 'HOST',
+      'net.role.host.sub': 'create a room, share the code',
+      'net.role.join': 'JOIN',
+      'net.role.join.sub': 'enter the room code',
+      'net.code.hint': 'ROOM CODE · HYP-XXXXXX',
+      'btn.start.net.host': '▶ OPEN ROOM',
+      'btn.start.net.join': '▶ CONNECT',
+      'btn.copy.code': '⧉ COPY CODE',
+      'btn.copy.link': '⧉ COPY LINK',
+      'net.status.opening': 'OPENING ROOM…',
+      'net.status.hosting': 'ROOM {code} · WAITING FOR OPPONENT',
+      'net.status.connecting': 'LINKING TO {code}…',
+      'net.status.peer': 'OPPONENT CONNECTED',
+      'net.status.copied': 'COPIED',
+      'net.status.badcode': 'MALFORMED ROOM CODE',
+      'net.status.unreachable': 'ROOM NOT FOUND',
+      'net.status.busy': 'ROOM CODE BUSY · TRY AGAIN',
+      'net.status.version': 'PROTOCOL MISMATCH · REFRESH THE PAGE',
+      'net.status.unsupported': 'WEBRTC UNAVAILABLE IN THIS BROWSER',
+      'net.status.error': 'LINK ERROR',
+      'net.status.closed': 'CONNECTION LOST',
+      'net.status.left': 'OPPONENT LEFT THE ROOM',
       'side.X.sub': 'move first',
       'side.O.sub': 'move second',
       'level.0': 'SCRIPT KIDDIE',
@@ -38,6 +64,7 @@
       'tag.mode.hypercube': '// HYPERCUBE · {dims} · {n} IN A ROW',
       'tag.opponent.human': '// HOT-SEAT · 2 PLAYERS',
       'tag.opponent.ai': '// AI: {level}',
+      'tag.opponent.p2p': '// ONLINE · P2P LINK',
       'tag.round': 'ROUND {n}',
       'score.draws': 'DRAWS',
       'btn.sound.on': 'SOUND: ON',
@@ -47,6 +74,7 @@
       'turn.thinking': 'AI THINKING',
       'turn.hotseat': '▶ TURN: {sym}',
       'turn.you': '▶ YOUR TURN: {sym}',
+      'turn.wait': '// WAITING: {sym}',
       'turn.line': '// LINE CLOSED: {sym} WINS',
       'turn.draw': '// GAME OVER: DRAW',
       'hint.board': 'SLICES w×x // INSIDE SLICE: ROWS y · COLUMNS z',
@@ -60,6 +88,7 @@
       'overlay.sub.hack': '// HUMAN ({sym}) OUTPLAYS THE AI · LEVEL: {level}',
       'overlay.sub.ai': '// SYMBOL {sym} · LEVEL: {level}',
       'overlay.sub.line': '// LINE CLOSED IN FOUR DIMENSIONS',
+      'overlay.net.sub': '// LINK TERMINATED · MATCH ABORTED',
       'rules.title': '// PROTOCOL: HYPERFIELD RULES',
       'btn.rules.close': '✕ CLOSE',
       'aria.cell': 'Slice {wx}, cell {yz}',
@@ -81,6 +110,7 @@
       'rules.5.li2': '<b>SCRIPT KIDDIE AI</b> — noise and randomness, occasionally notices the obvious.',
       'rules.5.li3': '<b>NETRUNNER AI</b> — a greedy heuristic: wins, blocks, pulls the best lines.',
       'rules.5.li4': '<b>CORPORATE AI</b> — alpha-beta search evaluating every line; thinks for up to ~1 second.',
+      'rules.5.li5': '<b>ONLINE</b> — direct p2p link between two devices (WebRTC). The host opens a room, plays X and shares the code or invite link; the guest joins as O.',
       'rules.6.t': '6 · MATCH',
       'rules.6.p': 'X wins, O wins and draws are accumulated across rounds. Changing the opponent starts a new match and resets the score.',
     },
@@ -95,6 +125,31 @@
       'opp.human.sub': 'хот-сит · 2 игрока',
       'opp.ai': 'ИИ',
       'opp.ai.sub': 'игра против машины',
+      'menu.field.net': 'СВЯЗЬ:',
+      'opp.online': 'ОНЛАЙН',
+      'opp.online.sub': 'p2p · прямое соединение',
+      'net.role.host': 'ХОСТ',
+      'net.role.host.sub': 'создать комнату и передать код',
+      'net.role.join': 'ГОСТЬ',
+      'net.role.join.sub': 'ввести код комнаты',
+      'net.code.hint': 'КОД КОМНАТЫ · HYP-XXXXXX',
+      'btn.start.net.host': '▶ ОТКРЫТЬ КОМНАТУ',
+      'btn.start.net.join': '▶ ПОДКЛЮЧИТЬСЯ',
+      'btn.copy.code': '⧉ КОД',
+      'btn.copy.link': '⧉ ССЫЛКА',
+      'net.status.opening': 'ОТКРЫВАЮ КОМНАТУ…',
+      'net.status.hosting': 'КОМНАТА {code} · ЖДУ СОПЕРНИКА',
+      'net.status.connecting': 'СОЕДИНЕНИЕ С {code}…',
+      'net.status.peer': 'СОПЕРНИК ПОДКЛЮЧИЛСЯ',
+      'net.status.copied': 'СКОПИРОВАНО',
+      'net.status.badcode': 'НЕВЕРНЫЙ КОД КОМНАТЫ',
+      'net.status.unreachable': 'КОМНАТА НЕ НАЙДЕНА',
+      'net.status.busy': 'КОД ЗАНЯТ · ПОПРОБУЙТЕ ЕЩЁ РАЗ',
+      'net.status.version': 'РАЗНЫЕ ВЕРСИИ ПРОТОКОЛА · ОБНОВИТЕ СТРАНИЦУ',
+      'net.status.unsupported': 'WEBRTC НЕДОСТУПЕН В ЭТОМ БРАУЗЕРЕ',
+      'net.status.error': 'ОШИБКА СВЯЗИ',
+      'net.status.closed': 'СВЯЗЬ ПОТЕРЯНА',
+      'net.status.left': 'СОПЕРНИК ПОКИНУЛ КОМНАТУ',
       'side.X.sub': 'ход первым',
       'side.O.sub': 'ход вторым',
       'level.0': 'СКРИП-КИДДИ',
@@ -109,6 +164,7 @@
       'tag.mode.hypercube': '// ГИПЕРКУБ · {dims} · {n} В РЯД',
       'tag.opponent.human': '// ХОТ-СИТ · 2 ИГРОКА',
       'tag.opponent.ai': '// ИИ: {level}',
+      'tag.opponent.p2p': '// ОНЛАЙН · P2P-КАНАЛ',
       'tag.round': 'РАУНД {n}',
       'score.draws': 'НИЧЬИ',
       'btn.sound.on': 'ЗВУК: ВКЛ',
@@ -118,6 +174,7 @@
       'turn.thinking': 'ИИ ДУМАЕТ',
       'turn.hotseat': '▶ ХОД: {sym}',
       'turn.you': '▶ ВАШ ХОД: {sym}',
+      'turn.wait': '// ЖДЁМ ХОД: {sym}',
       'turn.line': '// ЛИНИЯ ЗАМКНУТА: {sym} ПОБЕЖДАЕТ',
       'turn.draw': '// ПАРТИЯ ЗАВЕРШЕНА: НИЧЬЯ',
       'hint.board': 'СРЕЗЫ w×x // ВНУТРИ СРЕЗА: СТРОКИ y · СТОЛБЦЫ z',
@@ -131,6 +188,7 @@
       'overlay.sub.hack': '// ЧЕЛОВЕК ({sym}) ОБХОДИТ ИИ · УРОВЕНЬ: {level}',
       'overlay.sub.ai': '// СИМВОЛ {sym} · УРОВЕНЬ: {level}',
       'overlay.sub.line': '// ЛИНИЯ ЗАМКНУТА В ЧЕТЫРЁХ ИЗМЕРЕНИЯХ',
+      'overlay.net.sub': '// КАНАЛ ЗАКРЫТ · МАТЧ ПРЕРВАН',
       'rules.title': '// ПРОТОКОЛ: ПРАВИЛА ГИПЕРПОЛЯ',
       'btn.rules.close': '✕ ЗАКРЫТЬ',
       'aria.cell': 'Срез {wx}, клетка {yz}',
@@ -152,6 +210,7 @@
       'rules.5.li2': '<b>ИИ «СКРИП-КИДДИ»</b> — шум и случайность, изредка замечает очевидное.',
       'rules.5.li3': '<b>ИИ «НЕТРАННЕР»</b> — жадная эвристика: выигрывает, блокирует, тянет лучшие линии.',
       'rules.5.li4': '<b>ИИ «КОРПОРАТИВНЫЙ»</b> — перебор альфа-бета с оценкой всех линий; думает до ~1 секунды.',
+      'rules.5.li5': '<b>ОНЛАЙН</b> — прямое p2p-соединение двух устройств (WebRTC). Хост открывает комнату, играет X и передаёт код или ссылку-приглашение; гость подключается символом O.',
       'rules.6.t': '6 · МАТЧ',
       'rules.6.p': 'Победы X, победы O и ничьи суммируются между раундами. Смена соперника запускает новый матч и сбрасывает счёт.',
     },
@@ -184,17 +243,24 @@
     renderTurn();
     updateMuteLabel();
     applyBoardAria();
+    renderNetUI();
   }
 
   /* ---------- состояние UI-слоя ---------- */
 
   const config = { opponent: 'human', humanSide: 'X', aiLevel: 1 };
-  let match = null;          // экземпляр Match (логика матча — в js/match.js)
+  let match = null;          // экземпляр Match или сетевое представление гостя
   let cellEls = [];
   let aiToken = 0;
   let aiTimer = null;
   let overlayTimer = null;
   let overlayDismissed = false;
+  let session = null;        // сетевая сессия (js/session.js) — host или guest
+  let link = null;           // транспорт (js/net.js) — живой DataChannel
+  let netRole = 'host';      // роль в меню: 'host' | 'join'
+  let netCode = null;        // код текущей комнаты — для копирования
+  let netStatusMsg = null;   // последний статус { key, params, err } — перерендер на смене языка
+  let netWatchdog = null;    // таймер ожидания подключения (гость)
 
   const $ = (s) => document.querySelector(s);
   const sideCode = (s) => (s === 'X' ? GameCore.X : GameCore.O);
@@ -228,10 +294,8 @@
 
   function initMenu() {
     wireSeg('#seg-lang', setLang);
-    wireSeg('#seg-opponent', (v) => {
-      config.opponent = v;
-      document.querySelectorAll('.ai-only').forEach((el) => el.classList.toggle('hidden', v !== 'ai'));
-    });
+    wireSeg('#seg-opponent', (v) => { config.opponent = v; applyOpponentUI(); });
+    wireSeg('#seg-net', (v) => { netRole = v; renderNetUI(); });
     wireSeg('#seg-side', (v) => { config.humanSide = v; });
     wireSeg('#seg-level', (v) => { config.aiLevel = +v; });
     $('#btn-start').addEventListener('click', () => { AudioFX.click(); startMatch(); });
@@ -241,6 +305,8 @@
   /* ---------- матч и раунды (логика — в Match, здесь только UI) ---------- */
 
   function startMatch() {
+    netAbort();
+    if (config.opponent === 'p2p') { startNet(); return; }
     cancelTimers();
     overlayDismissed = false;
     match = Match.create(
@@ -253,22 +319,28 @@
   }
 
   function nextRound() {
+    if (session && session.kind === 'guest') { session.next(); return; } // строгий рендер: ждём снапшот
     match.nextRound();
     hideOverlay();
     beginRound();
+    netSync();
   }
 
   function restartRound() {
+    if (session && session.kind === 'guest') { session.restart(); return; }
     match.restartRound(); // тот же номер раунда — тот же стартёр
     hideOverlay();
     beginRound();
+    netSync();
   }
 
   function backToMenu() {
     cancelTimers();
+    netLeave();
     overlayDismissed = false;
     match = null;
     hideOverlay();
+    hideNetOverlay();
     showScreen('screen-menu');
   }
 
@@ -292,6 +364,17 @@
     if (!match || match.game.winner) { AudioFX.error(); return; }
     if (match.game.cells[idx] !== 0) { AudioFX.error(); return; }
     if (match.isAiTurn()) { AudioFX.error(); return; }
+    if (match.config.opponent === 'p2p') {
+      if (match.game.turn !== sideCode(match.config.humanSide)) { AudioFX.error(); return; }
+      if (session && session.kind === 'host') {
+        const mover = match.play(idx); // хост валидирует и применяет
+        afterMove(mover, idx);
+        netSync();
+      } else if (session) {
+        session.move(idx); // строгий режим: рендер ждёт снапшот
+      }
+      return;
+    }
     afterMove(match.play(idx), idx);
   }
 
@@ -315,6 +398,240 @@
     }, AI.delayFor(config.aiLevel));
   }
 
+  /* ---------- сеть: комнаты, сессии, статусы (логика — в Session/Net, ADR-0006) ---------- */
+
+  function applyOpponentUI() {
+    const v = config.opponent;
+    document.querySelectorAll('.ai-only').forEach((el) => el.classList.toggle('hidden', v !== 'ai'));
+    document.querySelectorAll('.net-only').forEach((el) => el.classList.toggle('hidden', v !== 'p2p'));
+    if (v !== 'p2p') { netAbort(); netStatusMsg = null; } // уходим из сети — гасим комнату и статус
+    renderNetUI();
+  }
+
+  function renderNetUI() {
+    const online = config.opponent === 'p2p';
+    $('#btn-start').textContent = online
+      ? t(netRole === 'host' ? 'btn.start.net.host' : 'btn.start.net.join')
+      : t('btn.start');
+    $('#net-code').placeholder = t('net.code.hint');
+    $('#field-code-row').classList.toggle('hidden', !(online && netRole === 'join'));
+    applyNetStatus();
+  }
+
+  function applyNetStatus() {
+    const el = $('#net-status');
+    el.classList.toggle('err', !!(netStatusMsg && netStatusMsg.err));
+    el.textContent = netStatusMsg ? t(netStatusMsg.key, netStatusMsg.params) : '';
+    $('#net-copy').classList.toggle('hidden', !(netStatusMsg && netStatusMsg.key === 'net.status.hosting'));
+  }
+
+  function netStatus(key, params, err) {
+    netStatusMsg = { key, params, err: !!err };
+    applyNetStatus();
+  }
+
+  function linkSend(msg) {
+    if (link) { try { link.send(msg); } catch (e) { /* канал уже мёртв */ } }
+  }
+
+  function netSync() {
+    if (session && session.kind === 'host' && link) linkSend(session.snapshot());
+  }
+
+  function clearConnectWatchdog() {
+    if (netWatchdog) { clearTimeout(netWatchdog); netWatchdog = null; }
+  }
+
+  function armConnectWatchdog() {
+    clearConnectWatchdog();
+    netWatchdog = setTimeout(() => {
+      netWatchdog = null;
+      if (!match) { netAbort(); netStatus('net.status.unreachable', null, true); AudioFX.error(); }
+    }, 15000);
+  }
+
+  function startNet() {
+    session = null;
+    netCode = null;
+    if (netRole === 'host') {
+      netCode = Net.makeCode();
+      netStatus('net.status.opening');
+      link = Net.host({
+        code: netCode,
+        onReady: () => netStatus('net.status.hosting', { code: netCode }),
+        onLink: () => netStatus('net.status.peer'),
+        onData: onNetData,
+        onLinkClosed: onNetLinkClosed,
+        onError: onNetError,
+      });
+    } else {
+      netCode = Net.normalize($('#net-code').value);
+      if (!Net.isValid(netCode)) {
+        netStatus('net.status.badcode', null, true);
+        AudioFX.error();
+        return;
+      }
+      session = Session.guest({ core: GameCore, n: N, send: linkSend }); // сессия до hello — снапшоты не потеряются
+      netStatus('net.status.connecting', { code: netCode });
+      link = Net.join({
+        code: netCode,
+        onLink: () => linkSend({ v: Session.PROTOCOL, t: 'hello' }),
+        onData: onNetData,
+        onLinkClosed: onNetLinkClosed,
+        onError: onNetError,
+      });
+      armConnectWatchdog();
+    }
+  }
+
+  function hostBeginRemote() {
+    cancelTimers();
+    overlayDismissed = false;
+    match = Match.create(
+      { n: N, opponent: 'p2p', humanSide: 'X', aiLevel: 0 },
+      { core: GameCore, ai: AI },
+    );
+    match.newMatch();
+    session = Session.host({ core: GameCore, match, send: linkSend });
+    showScreen('screen-game');
+    beginRound();
+    netSync();
+  }
+
+  function onNetData(msg) {
+    if (!session) {
+      // хост ещё без сессии: ждём hello корректной версии
+      if (netRole === 'host' && Session.checkHello(msg)) { hostBeginRemote(); return; }
+      if (netRole === 'host' && msg && msg.t === 'hello') {
+        linkSend({ v: Session.PROTOCOL, t: 'err', code: 'version' });
+        netAbort();
+        netStatus('net.status.version', null, true);
+      }
+      return;
+    }
+    const res = session.onData(msg);
+    if (!res) return;
+    if (res.kind === 'snap') { guestApplySnap(res); return; }
+    if (res.kind === 'err') {
+      netAbort();
+      netStatus(errKeyOf(res.code), null, true);
+      AudioFX.error();
+      return;
+    }
+    if (res.kind === 'bye') { onNetPeerLeft(); return; }
+    if (session.kind === 'host' && res.changed) {
+      if (res.kind === 'move') { afterMove(res.mover, res.idx); netSync(); }
+      else if (res.kind === 'next') nextRound();
+      else if (res.kind === 'restart') restartRound();
+    }
+  }
+
+  function guestShowGame() {
+    clearConnectWatchdog();
+    match = session.view;
+    showScreen('screen-game');
+    buildBoard();
+    renderTags();
+  }
+
+  function guestApplySnap(res) {
+    if (!match) guestShowGame();
+    else if (res.roundChanged) {
+      hideOverlay();
+      overlayDismissed = false;
+      buildBoard();
+    }
+    syncCells(match.game);
+    renderScore();
+    renderTurn();
+    if (match.game.winner) { endRoundUI(); return; }
+    if (match.game.lastMove >= 0) {
+      const mover = match.game.cells[match.game.lastMove];
+      if (mover === GameCore.X) AudioFX.moveX();
+      else if (mover === GameCore.O) AudioFX.moveO();
+    }
+    hideOverlay(); // строгий режим: без победы в снапшоте оверлею быть не должно
+    overlayDismissed = false;
+  }
+
+  function errKeyOf(code) {
+    return ({
+      version: 'net.status.version',
+      unreachable: 'net.status.unreachable',
+      busy: 'net.status.busy',
+      unsupported: 'net.status.unsupported',
+    })[code] || 'net.status.error';
+  }
+
+  function onNetError(kind) {
+    // в игре ошибка брокера/канала не фатальна: смерть канала ловит 'close' (onNetLinkClosed)
+    if (session && match) return;
+    const key = errKeyOf(kind);
+    netAbort();
+    netStatus(key, null, true);
+    AudioFX.error();
+  }
+
+  function onNetLinkClosed() {
+    link = null;
+    if (!session) return; // сами закрыли канал — реакция не нужна
+    session = null;
+    if (match) { cancelTimers(); showNetOverlay('net.status.closed'); }
+    else netStatus('net.status.closed', null, true);
+  }
+
+  function onNetPeerLeft() {
+    netAbort();
+    if (match) { cancelTimers(); showNetOverlay('net.status.left'); }
+    else netStatus('net.status.left', null, true);
+  }
+
+  function netAbort() {
+    clearConnectWatchdog();
+    if (link) { const l = link; link = null; try { l.close(); } catch (e) { /* уже закрыт */ } }
+    session = null;
+  }
+
+  /* намеренный выход: прощальное bye, чтобы соперник ушёл в меню, а не увидел обрыв */
+  function netLeave() {
+    clearConnectWatchdog();
+    if (!link) { session = null; return; }
+    try { link.send({ v: Session.PROTOCOL, t: 'bye' }); } catch (e) { /* канал уже мёртв */ }
+    const l = link;
+    link = null;
+    session = null;
+    setTimeout(() => { try { l.close(); } catch (e) { /* уже закрыт */ } }, 150);
+  }
+
+  function showNetOverlay(statusKey) {
+    cancelTimers();
+    const tEl = $('#net-overlay-title');
+    tEl.textContent = t(statusKey);
+    tEl.dataset.text = tEl.textContent;
+    $('#net-overlay-sub').textContent = t('overlay.net.sub');
+    $('#net-overlay').classList.remove('hidden');
+  }
+
+  function hideNetOverlay() {
+    $('#net-overlay').classList.add('hidden');
+  }
+
+  function copyText(text) {
+    const ok = () => netStatus('net.status.copied');
+    const fallback = () => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); ok(); } catch (e) { netStatus('net.status.error', null, true); }
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback);
+    else fallback();
+  }
+
   /* ---------- конец раунда (UI-сторона) ---------- */
 
   function endRoundUI() {
@@ -335,7 +652,7 @@
     }
 
     if (w === GameCore.DRAW) AudioFX.draw();
-    else if (match.config.opponent === 'ai' && w !== sideCode(match.config.humanSide)) AudioFX.lose();
+    else if (match.config.opponent !== 'human' && w !== sideCode(match.config.humanSide)) AudioFX.lose();
     else AudioFX.win();
 
     overlayTimer = setTimeout(() => {
@@ -380,13 +697,37 @@
     });
   }
 
+  function renderCellMark(el, player) {
+    el.dataset.mark = player === GameCore.X ? 'x' : 'o';
+    el.classList.add('filled');
+    el.innerHTML = '<span class="mark ' + (player === GameCore.X ? 'mark-x' : 'mark-o') + '" aria-hidden="true"></span>';
+  }
+
   function renderCell(idx, player) {
     const el = cellEls[idx];
     if (!el) return;
-    el.classList.add('filled');
-    el.innerHTML = '<span class="mark ' + (player === GameCore.X ? 'mark-x' : 'mark-o') + '" aria-hidden="true"></span>';
+    renderCellMark(el, player);
     cellEls.forEach((c) => c.classList.remove('last'));
     el.classList.add('last');
+  }
+
+  /* полная синхронизация поля по снапшоту: сетевой гость рендерит только подтверждённое */
+  function syncCells(g) {
+    cellEls.forEach((el, idx) => {
+      if (!el) return;
+      const v = g.cells[idx];
+      const cur = el.dataset.mark === 'x' ? GameCore.X : el.dataset.mark === 'o' ? GameCore.O : 0;
+      if (v === cur) return;
+      if (v === 0) {
+        el.dataset.mark = '';
+        el.classList.remove('filled', 'win', 'dim', 'last');
+        el.innerHTML = '';
+      } else {
+        renderCellMark(el, v);
+      }
+    });
+    cellEls.forEach((el) => { if (el) el.classList.remove('last'); });
+    if (g.lastMove >= 0 && cellEls[g.lastMove]) cellEls[g.lastMove].classList.add('last');
   }
 
   function renderTurnClass() {
@@ -420,7 +761,11 @@
       el.classList.add('thinking');
     } else {
       el.classList.remove('thinking');
-      const key = match.config.opponent === 'ai' ? 'turn.you' : 'turn.hotseat';
+      let key = 'turn.hotseat';
+      if (match.config.opponent === 'ai') key = 'turn.you';
+      else if (match.config.opponent === 'p2p') {
+        key = g.turn === sideCode(match.config.humanSide) ? 'turn.you' : 'turn.wait';
+      }
       el.innerHTML = t(key).replace('{sym}', symSpan(g.turn));
     }
   }
@@ -440,7 +785,9 @@
     $('#tag-mode').textContent = t('tag.mode.hypercube', PARAMS);
     $('#tag-opponent').textContent = config.opponent === 'human'
       ? t('tag.opponent.human')
-      : t('tag.opponent.ai').replace('{level}', t('level.' + config.aiLevel));
+      : config.opponent === 'p2p'
+        ? t('tag.opponent.p2p')
+        : t('tag.opponent.ai').replace('{level}', t('level.' + config.aiLevel));
     $('#tag-round').textContent = t('tag.round').replace('{n}', pad2((match ? match.round : 0) + 1));
   }
 
@@ -490,12 +837,26 @@
 
   /* ---------- инициализация ---------- */
 
+  /* приглашение по ссылке: ?room=CODE открывает меню в роли гостя с префиллом кода */
+  function applyInviteLink() {
+    let room = null;
+    try { room = Net.normalize(new URLSearchParams(location.search).get('room')); } catch (e) { /* старый браузер */ }
+    if (!Net.isValid(room)) return;
+    config.opponent = 'p2p';
+    netRole = 'join';
+    document.querySelectorAll('#seg-opponent .seg-btn').forEach((b) => b.classList.toggle('active', b.dataset.value === 'p2p'));
+    document.querySelectorAll('#seg-net .seg-btn').forEach((b) => b.classList.toggle('active', b.dataset.value === 'join'));
+    $('#net-code').value = room;
+  }
+
   function init() {
     document.querySelectorAll('#seg-lang .seg-btn').forEach((b) => {
       b.classList.toggle('active', b.dataset.value === lang);
     });
 
     initMenu();
+    applyInviteLink();
+    applyOpponentUI();
     setLang(lang);
 
     $('#board').addEventListener('click', (e) => {
@@ -507,6 +868,16 @@
     $('#btn-menu').addEventListener('click', () => { AudioFX.click(); backToMenu(); });
     $('#btn-next').addEventListener('click', () => { AudioFX.click(); nextRound(); });
     $('#btn-overlay-menu').addEventListener('click', () => { AudioFX.click(); backToMenu(); });
+
+    $('#btn-copy-code').addEventListener('click', () => { AudioFX.click(); if (netCode) copyText(netCode); });
+    $('#btn-copy-link').addEventListener('click', () => {
+      AudioFX.click();
+      if (netCode) copyText(location.href.split('?')[0] + '?room=' + netCode);
+    });
+    $('#btn-net-menu').addEventListener('click', () => { AudioFX.click(); hideNetOverlay(); backToMenu(); });
+    $('#net-code').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { AudioFX.click(); startMatch(); }
+    });
 
     $('#btn-hide').addEventListener('click', () => {
       AudioFX.click();
