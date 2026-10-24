@@ -1,11 +1,34 @@
 'use strict';
 
 /*
- * Ядро игры: гиперполе n×n×n×n, клетки адресуются индексом
- * idx = ((w*n + x)*n + y)*n + z. Символы: 0 — пусто, 1 — X, 2 — O.
- * Победа — линия из n клеток по любому из 4D-направлений.
+ * Ядро игры «Гиперполе»: четырёхмерный куб n×n×n×n.
+ *
+ * INTERFACE — всё, что должен знать вызывающий:
+ *   create(n, { starter })          → state (описан ниже); starter — код символа,
+ *                                     начинающего партию (по умолчанию X).
+ *   applyMove(state, idx)           → state; занимает клетку idx текущим символом,
+ *                                     переключает ход или фиксирует победу/ничью.
+ *   lineWinsFor(state, idx, player) → массив индексов закрывающей линии или null.
+ *   idxOf(n, w, x, y, z)            → индекс клетки; единственное место, где живёт
+ *                                     формула адресации idx = ((w*n + x)*n + y)*n + z.
+ *   facts(n)                        → { n, dims, cells, lines } — справка о поле для UI.
+ *   X = 1, O = 2, DRAW = 3          → кодировка символов и ничьей.
+ *
+ * State — plain data и объявленная часть interface (её читают app.js и ai.js):
+ *   n, cellCount, lines (массивы индексов выигрышных линий), cellLines,
+ *   cells — Int8Array: 0 пусто, 1 X, 2 O;
+ *   turn — 1 X / 2 O; moveCount; winner — 0 идёт / X / O / DRAW;
+ *   winLine — массив индексов или null; lastMove — индекс или -1.
  */
 const GameCore = (() => {
+  const X = 1;
+  const O = 2;
+  const DRAW = 3;
+
+  /* индекс клетки — единственное место с формулой адресации */
+  function idxOf(n, w, x, y, z) {
+    return ((w * n + x) * n + y) * n + z;
+  }
 
   /* Канонические направления: компоненты из {-1,0,1}, первая ненулевая = +1. */
   function makeDirections() {
@@ -40,9 +63,7 @@ const GameCore = (() => {
         for (let j = 0; j < free.length; j++) { s[free[j]] = t % n; t = Math.floor(t / n); }
         const line = new Array(n);
         for (let step = 0; step < n; step++) {
-          const w = s[0] + v[0] * step, x = s[1] + v[1] * step;
-          const y = s[2] + v[2] * step, z = s[3] + v[3] * step;
-          line[step] = ((w * n + x) * n + y) * n + z;
+          line[step] = idxOf(n, s[0] + v[0] * step, s[1] + v[1] * step, s[2] + v[2] * step, s[3] + v[3] * step);
         }
         lines.push(line);
       }
@@ -50,32 +71,34 @@ const GameCore = (() => {
     return lines;
   }
 
-  /* Индекс абсолютного центра (1,1,1,1) — осмыслен для нечётных n. */
-  function centerIdx(n) {
-    return ((1 * n + 1) * n + 1) * n + 1;
-  }
-
-  function create(n, blocked = []) {
+  function create(n, { starter = X } = {}) {
     const lines = makeLines(n);
     const cellCount = n * n * n * n;
     const cellLines = Array.from({ length: cellCount }, () => []);
     for (let li = 0; li < lines.length; li++) {
       for (const c of lines[li]) cellLines[c].push(li);
     }
-    const blockedSet = new Set(blocked);
     return {
       n,
       cellCount,
       lines,
       cellLines,
-      blocked: blockedSet,
-      playableCount: cellCount - blockedSet.size,
       cells: new Int8Array(cellCount),
-      turn: 1,        // 1 = X, 2 = O
+      turn: starter,
       moveCount: 0,
-      winner: 0,      // 0 — игра идёт, 1 — X, 2 — O, 3 — ничья
+      winner: 0,      // 0 — партия идёт
       winLine: null,
       lastMove: -1,
+    };
+  }
+
+  /* Справка о поле для UI: размеры, число клеток и линий — единый источник чисел. */
+  function facts(n) {
+    return {
+      n,
+      dims: `${n}×${n}×${n}×${n}`,
+      cells: n * n * n * n,
+      lines: makeLines(n).length,
     };
   }
 
@@ -94,7 +117,6 @@ const GameCore = (() => {
   }
 
   function applyMove(state, idx) {
-    if (state.blocked.has(idx)) return state; // заблокированные клетки не играют
     const player = state.turn;
     state.cells[idx] = player;
     state.lastMove = idx;
@@ -103,13 +125,16 @@ const GameCore = (() => {
     if (winLine) {
       state.winner = player;
       state.winLine = winLine;
-    } else if (state.moveCount === state.playableCount) {
-      state.winner = 3;
+    } else if (state.moveCount === state.cellCount) {
+      state.winner = DRAW;
     } else {
       state.turn = 3 - player;
     }
     return state;
   }
 
-  return { create, applyMove, lineWinsFor, centerIdx };
+  return { X, O, DRAW, create, applyMove, lineWinsFor, idxOf, facts };
 })();
+
+/* Загрузка в Node без этапа сборки: в браузере module не существует. */
+if (typeof module !== 'undefined' && module.exports) module.exports = GameCore;

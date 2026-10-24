@@ -8,11 +8,8 @@ no build step, no dependencies: just open `index.html`.
 
 ## Features
 
-- **Two board modes**
-  - *Classic* — 3×3×3×3 (81 cells), 3 in a row wins; the absolute center is
-    blocked, otherwise the first player would win by force.
-  - *Hypercube* — 4×4×4×4 (256 cells), 4 in a row wins.
-- **272 / 520 winning lines** — axes, slice diagonals, cube diagonals and
+- **Hypercube field** — 4×4×4×4 (256 cells), 4 in a row wins.
+- **520 winning lines** — axes, slice diagonals, cube diagonals and
   hypercube diagonals across 4D space.
 - **Opponents** — hot-seat for two players, or AI with three levels:
   - *Script Kiddie* — noise and randomness;
@@ -29,6 +26,17 @@ no build step, no dependencies: just open `index.html`.
 ## Run locally
 
 Open `index.html` in any modern browser. That's it — no server, no build.
+
+## Tests
+
+Requires Node 18+:
+
+```
+node --test tests/
+```
+
+The suites cover the 4D core (line generation, wins), all three AI levels
+(deterministic via an injected RNG) and the match state machine (fake AI adapter).
 
 ## Deploy to GitHub Pages
 
@@ -52,8 +60,10 @@ index.html            markup: menu, game screen, overlays
 css/style.css         cyberpunk styling (neon, scanlines, glitch)
 js/game.js            core: 4D board, line generation, win detection
 js/ai.js              three AI levels (random / heuristic / alpha-beta)
+js/match.js           match logic: rounds, starter alternation, scoring
 js/audio.js           synthesized WebAudio sounds
-js/app.js             i18n (EN/RU), menu, match flow, rendering
+js/app.js             i18n (EN/RU), menu, rendering
+tests/                node:test suites: core, AI, match
 scripts/build.sh      assembles dist/ for GitHub Pages
 scripts/build.cmd     the same for Windows
 docs/adr/             architecture decision records
@@ -62,12 +72,12 @@ CONTEXT.md            project glossary
 
 ## Hyper-Cube (по-русски)
 
-Крестики-нолики в четырёхмерном пространстве в киберпанк-стилистике. Два режима:
-«Классика» (3×3×3×3, победа — 3 в ряд, абсолютный центр заблокирован) и
-«Гиперкуб» (4×4×4×4, победа — 4 в ряд). Соперники: хот-сит на двоих или ИИ трёх
-уровней — «Скрип-кидди», «Нетраннер», «Корпоративный ИИ». Счёт ведётся между
-раундами, стартёр чередуется. Интерфейс — русский и английский (по умолчанию
-английский, выбор в меню). Для запуска просто откройте `index.html` в браузере.
+Крестики-нолики в четырёхмерном пространстве в киберпанк-стилистике. Поле —
+«Гиперкуб»: 4×4×4×4, победа — 4 в ряд (520 линий). Соперники: хот-сит на двоих
+или ИИ трёх уровней — «Скрип-кидди», «Нетраннер», «Корпоративный ИИ». Счёт
+ведётся между раундами, стартёр чередуется. Интерфейс — русский и английский
+(по умолчанию английский, выбор в меню). Для запуска просто откройте `index.html`
+в браузере. Логика покрыта тестами: `node --test tests/` (ядро, ИИ, матч).
 
 ## License
 

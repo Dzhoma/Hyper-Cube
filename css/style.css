@@ -296,21 +296,6 @@ h1.glitch { font-size: clamp(40px, 9vmin, 84px); letter-spacing: 0.06em; font-we
 }
 .cell:focus-visible { outline: 1px solid var(--c-yellow); outline-offset: 1px; }
 
-/* заблокированная клетка */
-.cell.blocked,
-.cell:disabled {
-  pointer-events: none;
-  cursor: not-allowed;
-  border-color: rgba(255, 43, 74, 0.35);
-  background: repeating-linear-gradient(45deg, rgba(255, 43, 74, 0.12) 0 5px, transparent 5px 10px);
-}
-.cell.blocked::before {
-  content: '⊘';
-  color: rgba(255, 43, 74, 0.6);
-  font-size: clamp(10px, 2vmin, 22px);
-  text-shadow: 0 0 8px rgba(255, 43, 74, 0.4);
-}
-
 /* призрак хода при наведении */
 .board.turn-x .cell:not(.filled):hover::after,
 .board.turn-o .cell:not(.filled):hover::after {
