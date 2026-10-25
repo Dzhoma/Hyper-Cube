@@ -1,0 +1,26 @@
+{
+  "name": "hyper-cube",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tic-tac-toe in four-dimensional space — cyberpunk static game with AI and P2P multiplayer",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test tests/game.test.js tests/ai.test.js tests/match.test.js tests/session.test.js",
+    "lint": "oxlint .",
+    "format": "oxfmt ."
+  },
+  "dependencies": {
+    "peerjs": "^1.5.5"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "vite": "^8.3.5"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}

@@ -1,28 +1,27 @@
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert');
-const Session = require('../js/session.js');
-const Net = require('../js/net.js');
-const GameCore = require('../js/game.js');
-const Match = require('../js/match.js');
-const { mulberry32 } = require('./helpers.js');
+import { test } from 'node:test';
+import assert from 'node:assert';
+import Session from '../js/session.js';
+import Net from '../js/net.js';
+import GameCore from '../js/game.js';
+import Match from '../js/match.js';
+import { mulberry32 } from './helpers.js';
 
-/* Пара транспортов: отправка одной стороны попадает в «входящие» другой. */
+/* Транспорт гостя: отправка попадает в «входящие» хоста; хост рассылает сам через snapshot(). */
 function makePipe() {
-  const toGuest = [];
   const toHost = [];
   return {
-    toGuest,
     toHost,
-    hostSend: (m) => toGuest.push(m),
     guestSend: (m) => toHost.push(m),
   };
 }
 
-function hostUp(pipe) {
-  const match = Match.create({ n: 4, opponent: 'p2p', humanSide: 'X' }, { core: GameCore, ai: null });
+function hostUp() {
+  const match = Match.create(
+    { n: 4, opponent: 'p2p', humanSide: 'X' },
+    { core: GameCore, ai: null },
+  );
   match.newMatch();
-  const session = Session.host({ core: GameCore, match, send: pipe.hostSend });
+  const session = Session.host({ core: GameCore, match });
   return { match, session };
 }
 
@@ -48,8 +47,7 @@ test('checkHello: только hello с текущей версией прото
 });
 
 test('ход гостя принимается только в его ход и валидируется хостом', () => {
-  const pipe = makePipe();
-  const { match, session } = hostUp(pipe);
+  const { match, session } = hostUp();
   assert.equal(session.onData({ t: 'move', idx: 5 }).kind, 'ignore'); // сейчас ход X
   match.play(0); // хост занял клетку символом X
   const res = session.onData({ t: 'move', idx: 5 });
@@ -62,7 +60,7 @@ test('ход гостя принимается только в его ход и 
 
 test('снапшот переносит состояние в представление гостя', () => {
   const pipe = makePipe();
-  const { match, session } = hostUp(pipe);
+  const { match, session } = hostUp();
   match.play(0); // X
   match.play(16); // O
   const guest = guestUp(pipe);
@@ -79,23 +77,27 @@ test('снапшот переносит состояние в представл
 
 test('полный цикл: победа хоста, next от гостя, раунд 2 начинает O', () => {
   const pipe = makePipe();
-  const { match, session } = hostUp(pipe);
+  const { match, session } = hostUp();
   const guest = guestUp(pipe);
   guest.onData(session.snapshot()); // старт раунда 1: ход X
   // X: 0,1,2,3 — ось z; O отвечает 16,17,18
-  match.play(0); guest.onData(session.snapshot());
+  match.play(0);
+  guest.onData(session.snapshot());
   assert.equal(guest.move(16), true);
   session.onData(pipe.toHost.pop());
   guest.onData(session.snapshot());
-  match.play(1); guest.onData(session.snapshot());
+  match.play(1);
+  guest.onData(session.snapshot());
   assert.equal(guest.move(17), true);
   session.onData(pipe.toHost.pop());
   guest.onData(session.snapshot());
-  match.play(2); guest.onData(session.snapshot());
+  match.play(2);
+  guest.onData(session.snapshot());
   assert.equal(guest.move(18), true);
   session.onData(pipe.toHost.pop());
   guest.onData(session.snapshot());
-  match.play(3); guest.onData(session.snapshot()); // X замкнул линию
+  match.play(3);
+  guest.onData(session.snapshot()); // X замкнул линию
   assert.equal(match.game.winner, GameCore.X);
   assert.deepEqual(match.score, { X: 1, O: 0, D: 0 });
   assert.equal(guest.view.game.winner, GameCore.X);
@@ -116,7 +118,7 @@ test('полный цикл: победа хоста, next от гостя, ра
 
 test('restart от гостя переигрывает раунд с тем же стартёром', () => {
   const pipe = makePipe();
-  const { match, session } = hostUp(pipe);
+  const { match, session } = hostUp();
   const guest = guestUp(pipe);
   guest.onData(session.snapshot());
   match.play(0);
@@ -131,7 +133,7 @@ test('restart от гостя переигрывает раунд с тем же
 
 test('гость не отправляет ход на чужой очереди; next — только после победы', () => {
   const pipe = makePipe();
-  const { session } = hostUp(pipe);
+  const { session } = hostUp();
   const guest = guestUp(pipe);
   guest.onData(session.snapshot()); // ход X — не гостя
   assert.equal(guest.move(5), false);
@@ -155,7 +157,7 @@ test('ошибка протокола доходит до гостя, мусор
 
 test('bye доходит до обеих сторон сессии', () => {
   const pipe = makePipe();
-  const { session } = hostUp(pipe);
+  const { session } = hostUp();
   const guest = guestUp(pipe);
   assert.equal(session.onData({ t: 'bye' }).kind, 'bye');
   assert.equal(guest.onData({ t: 'bye' }).kind, 'bye');

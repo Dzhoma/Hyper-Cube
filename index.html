@@ -1,198 +1,276 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#04040a">
-  <title>HyperCube // tic-tac-toe in four-dimensional space</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2304040a'/%3E%3Cpath d='M7 7l18 18M25 7L7 25' stroke='%2300f0ff' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <div class="fx-scanlines" aria-hidden="true"></div>
-  <div class="fx-vignette" aria-hidden="true"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#04040a" />
+    <title>HyperCube // tic-tac-toe in four-dimensional space</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2304040a'/%3E%3Cpath d='M7 7l18 18M25 7L7 25' stroke='%2300f0ff' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="fx-scanlines" aria-hidden="true"></div>
+    <div class="fx-vignette" aria-hidden="true"></div>
 
-  <main id="app">
-    <!-- MENU SCREEN -->
-    <section id="screen-menu" class="screen">
-      <header class="menu-head">
-        <h1 class="glitch neon-cyan" data-text="HyperCube">HyperCube</h1>
-        <p class="subtitle"><span data-i18n="menu.subtitle">// HYPERFIELD ACTIVE · TIC-TAC-TOE IN FOUR-DIMENSIONAL SPACE</span> <span class="caret">▮</span></p>
-      </header>
+    <main id="app">
+      <!-- MENU SCREEN -->
+      <section id="screen-menu" class="screen">
+        <header class="menu-head">
+          <h1 class="glitch neon-cyan" data-text="HyperCube">HyperCube</h1>
+          <p class="subtitle">
+            <span data-i18n="menu.subtitle"
+              >// HYPERFIELD ACTIVE · TIC-TAC-TOE IN FOUR-DIMENSIONAL SPACE</span
+            >
+            <span class="caret">▮</span>
+          </p>
+        </header>
 
-      <div class="panel menu-panel">
-        <div class="field">
-          <span class="field-label" data-i18n="menu.field.lang">LANGUAGE:</span>
-          <div class="seg" id="seg-lang">
-            <button class="seg-btn active" data-value="en"><span>EN</span><small>english</small></button>
-            <button class="seg-btn" data-value="ru"><span>RU</span><small>русский</small></button>
+        <div class="panel menu-panel">
+          <div class="field">
+            <span class="field-label" data-i18n="menu.field.lang">LANGUAGE:</span>
+            <div class="seg" id="seg-lang">
+              <button class="seg-btn active" data-value="en">
+                <span>EN</span><small>english</small>
+              </button>
+              <button class="seg-btn" data-value="ru"><span>RU</span><small>русский</small></button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field-label" data-i18n="menu.field.opponent">OPPONENT:</span>
+            <div class="seg" id="seg-opponent">
+              <button class="seg-btn active" data-value="human">
+                <span data-i18n="opp.human">HUMAN</span
+                ><small data-i18n="opp.human.sub">hot-seat · 2 players</small>
+              </button>
+              <button class="seg-btn" data-value="ai">
+                <span data-i18n="opp.ai">AI</span
+                ><small data-i18n="opp.ai.sub">play against the machine</small>
+              </button>
+              <button class="seg-btn" data-value="p2p">
+                <span data-i18n="opp.online">ONLINE</span
+                ><small data-i18n="opp.online.sub">p2p · direct webrtc link</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="field net-only hidden" id="field-net">
+            <span class="field-label" data-i18n="menu.field.net">CONNECTION:</span>
+            <div class="seg" id="seg-net">
+              <button class="seg-btn active" data-value="host">
+                <span data-i18n="net.role.host">HOST</span
+                ><small data-i18n="net.role.host.sub">create a room, share the code</small>
+              </button>
+              <button class="seg-btn" data-value="join">
+                <span data-i18n="net.role.join">JOIN</span
+                ><small data-i18n="net.role.join.sub">enter the room code</small>
+              </button>
+            </div>
+            <div class="net-row hidden" id="field-code-row">
+              <input id="net-code" maxlength="10" autocomplete="off" spellcheck="false" />
+            </div>
+            <div id="net-status" aria-live="polite"></div>
+            <div class="net-copy hidden" id="net-copy">
+              <button class="btn-ghost" id="btn-copy-code" data-i18n="btn.copy.code">
+                ⧉ COPY CODE
+              </button>
+              <button class="btn-ghost" id="btn-copy-link" data-i18n="btn.copy.link">
+                ⧉ COPY LINK
+              </button>
+            </div>
+          </div>
+
+          <div class="field ai-only hidden" id="field-side">
+            <span class="field-label" data-i18n="menu.field.side">YOUR SYMBOL:</span>
+            <div class="seg" id="seg-side">
+              <button class="seg-btn active" data-value="X">
+                <span>X</span><small data-i18n="side.X.sub">move first</small>
+              </button>
+              <button class="seg-btn" data-value="O">
+                <span>O</span><small data-i18n="side.O.sub">move second</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="field ai-only hidden" id="field-level">
+            <span class="field-label" data-i18n="menu.field.level">AI LEVEL:</span>
+            <div class="seg" id="seg-level">
+              <button class="seg-btn" data-value="0">
+                <span data-i18n="level.0">SCRIPT KIDDIE</span
+                ><small data-i18n="level.0.sub">noise and randomness</small>
+              </button>
+              <button class="seg-btn active" data-value="1">
+                <span data-i18n="level.1">NETRUNNER</span
+                ><small data-i18n="level.1.sub">greedy heuristic</small>
+              </button>
+              <button class="seg-btn" data-value="2">
+                <span data-i18n="level.2">CORPORATE AI</span
+                ><small data-i18n="level.2.sub">search · up to ~1 sec</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="menu-actions">
+            <button id="btn-start" class="btn-primary">▶ INITIALIZE MATCH</button>
+            <button id="btn-rules" class="btn-ghost" data-i18n="btn.rules">
+              RULES // PROTOCOL
+            </button>
           </div>
         </div>
 
-        <div class="field">
-          <span class="field-label" data-i18n="menu.field.opponent">OPPONENT:</span>
-          <div class="seg" id="seg-opponent">
-            <button class="seg-btn active" data-value="human"><span data-i18n="opp.human">HUMAN</span><small data-i18n="opp.human.sub">hot-seat · 2 players</small></button>
-            <button class="seg-btn" data-value="ai"><span data-i18n="opp.ai">AI</span><small data-i18n="opp.ai.sub">play against the machine</small></button>
-            <button class="seg-btn" data-value="p2p"><span data-i18n="opp.online">ONLINE</span><small data-i18n="opp.online.sub">p2p · direct webrtc link</small></button>
+        <p class="hint" id="menu-hint"></p>
+      </section>
+
+      <!-- GAME SCREEN -->
+      <section id="screen-game" class="screen hidden">
+        <header class="game-head">
+          <div class="head-left">
+            <span class="brand">HyperCube</span>
+            <span class="mode-tag" id="tag-mode"></span>
+            <span class="mode-tag" id="tag-opponent"></span>
+            <span class="mode-tag" id="tag-round"></span>
           </div>
-        </div>
-
-        <div class="field net-only hidden" id="field-net">
-          <span class="field-label" data-i18n="menu.field.net">CONNECTION:</span>
-          <div class="seg" id="seg-net">
-            <button class="seg-btn active" data-value="host"><span data-i18n="net.role.host">HOST</span><small data-i18n="net.role.host.sub">create a room, share the code</small></button>
-            <button class="seg-btn" data-value="join"><span data-i18n="net.role.join">JOIN</span><small data-i18n="net.role.join.sub">enter the room code</small></button>
+          <div class="score" id="score"></div>
+          <div class="head-right">
+            <button class="btn-ghost" id="btn-mute" data-i18n="btn.sound.on">SOUND: ON</button>
+            <button class="btn-ghost" id="btn-restart" data-i18n="btn.restart">⟲ RESTART</button>
+            <button class="btn-ghost" id="btn-menu" data-i18n="btn.menu">MENU</button>
           </div>
-          <div class="net-row hidden" id="field-code-row">
-            <input id="net-code" maxlength="10" autocomplete="off" spellcheck="false">
-          </div>
-          <div id="net-status" aria-live="polite"></div>
-          <div class="net-copy hidden" id="net-copy">
-            <button class="btn-ghost" id="btn-copy-code" data-i18n="btn.copy.code">⧉ COPY CODE</button>
-            <button class="btn-ghost" id="btn-copy-link" data-i18n="btn.copy.link">⧉ COPY LINK</button>
-          </div>
+        </header>
+
+        <div id="turn-banner" class="turn-banner"></div>
+
+        <div id="inline-next" class="inline-next hidden">
+          <button id="btn-banner-next" class="btn-ghost" data-i18n="btn.next">▶ NEXT ROUND</button>
         </div>
 
-        <div class="field ai-only hidden" id="field-side">
-          <span class="field-label" data-i18n="menu.field.side">YOUR SYMBOL:</span>
-          <div class="seg" id="seg-side">
-            <button class="seg-btn active" data-value="X"><span>X</span><small data-i18n="side.X.sub">move first</small></button>
-            <button class="seg-btn" data-value="O"><span>O</span><small data-i18n="side.O.sub">move second</small></button>
-          </div>
+        <div id="board-wrap">
+          <div id="board" class="board"></div>
         </div>
 
-        <div class="field ai-only hidden" id="field-level">
-          <span class="field-label" data-i18n="menu.field.level">AI LEVEL:</span>
-          <div class="seg" id="seg-level">
-            <button class="seg-btn" data-value="0"><span data-i18n="level.0">SCRIPT KIDDIE</span><small data-i18n="level.0.sub">noise and randomness</small></button>
-            <button class="seg-btn active" data-value="1"><span data-i18n="level.1">NETRUNNER</span><small data-i18n="level.1.sub">greedy heuristic</small></button>
-            <button class="seg-btn" data-value="2"><span data-i18n="level.2">CORPORATE AI</span><small data-i18n="level.2.sub">search · up to ~1 sec</small></button>
-          </div>
+        <p class="board-hint" data-i18n="hint.board">
+          SLICES w×x // INSIDE SLICE: ROWS y · COLUMNS z
+        </p>
+      </section>
+    </main>
+
+    <!-- ROUND RESULT OVERLAY -->
+    <div id="overlay" class="overlay hidden">
+      <div class="overlay-box panel">
+        <h2 id="overlay-title" class="glitch"></h2>
+        <p id="overlay-sub" class="overlay-sub"></p>
+        <div class="overlay-score" id="overlay-score"></div>
+        <div class="overlay-actions">
+          <button id="btn-next" class="btn-primary" data-i18n="btn.next">▶ NEXT ROUND</button>
+          <button id="btn-hide" class="btn-ghost" data-i18n="btn.hide">
+            ▼ COLLAPSE // ANALYZE
+          </button>
+          <button id="btn-overlay-menu" class="btn-ghost" data-i18n="btn.menu">MENU</button>
         </div>
-
-        <div class="menu-actions">
-          <button id="btn-start" class="btn-primary">▶ INITIALIZE MATCH</button>
-          <button id="btn-rules" class="btn-ghost" data-i18n="btn.rules">RULES // PROTOCOL</button>
-        </div>
-      </div>
-
-      <p class="hint" id="menu-hint"></p>
-    </section>
-
-    <!-- GAME SCREEN -->
-    <section id="screen-game" class="screen hidden">
-      <header class="game-head">
-        <div class="head-left">
-          <span class="brand">HyperCube</span>
-          <span class="mode-tag" id="tag-mode"></span>
-          <span class="mode-tag" id="tag-opponent"></span>
-          <span class="mode-tag" id="tag-round"></span>
-        </div>
-        <div class="score" id="score"></div>
-        <div class="head-right">
-          <button class="btn-ghost" id="btn-mute" data-i18n="btn.sound.on">SOUND: ON</button>
-          <button class="btn-ghost" id="btn-restart" data-i18n="btn.restart">⟲ RESTART</button>
-          <button class="btn-ghost" id="btn-menu" data-i18n="btn.menu">MENU</button>
-        </div>
-      </header>
-
-      <div id="turn-banner" class="turn-banner"></div>
-
-      <div id="inline-next" class="inline-next hidden">
-        <button id="btn-banner-next" class="btn-ghost" data-i18n="btn.next">▶ NEXT ROUND</button>
-      </div>
-
-      <div id="board-wrap">
-        <div id="board" class="board"></div>
-      </div>
-
-      <p class="board-hint" data-i18n="hint.board">SLICES w×x // INSIDE SLICE: ROWS y · COLUMNS z</p>
-    </section>
-  </main>
-
-  <!-- ROUND RESULT OVERLAY -->
-  <div id="overlay" class="overlay hidden">
-    <div class="overlay-box panel">
-      <h2 id="overlay-title" class="glitch"></h2>
-      <p id="overlay-sub" class="overlay-sub"></p>
-      <div class="overlay-score" id="overlay-score"></div>
-      <div class="overlay-actions">
-        <button id="btn-next" class="btn-primary" data-i18n="btn.next">▶ NEXT ROUND</button>
-        <button id="btn-hide" class="btn-ghost" data-i18n="btn.hide">▼ COLLAPSE // ANALYZE</button>
-        <button id="btn-overlay-menu" class="btn-ghost" data-i18n="btn.menu">MENU</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- NET LINK OVERLAY -->
-  <div id="net-overlay" class="overlay hidden">
-    <div class="overlay-box panel">
-      <h2 id="net-overlay-title" class="glitch t-net"></h2>
-      <p id="net-overlay-sub" class="overlay-sub"></p>
-      <div class="overlay-actions">
-        <button id="btn-net-menu" class="btn-primary" data-i18n="btn.menu">MENU</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- RULES OVERLAY -->
-  <div id="rules-overlay" class="overlay hidden">
-    <div class="overlay-box panel rules-panel">
-      <h2 class="rules-title" data-i18n="rules.title">// PROTOCOL: HYPERFIELD RULES</h2>
-      <div class="rules-body">
-        <section>
-          <h3 data-i18n="rules.1.t">1 · HYPERFIELD</h3>
-          <p data-i18n="rules.1.p">The game is played in a four-dimensional cube n×n×n×n. Every cell is addressed by four coordinates (w, x, y, z). For humans, the hyperfield is displayed as a grid of slices: the grid rows are the w coordinate, the columns are x; inside a slice, rows are y and columns are z.</p>
-        </section>
-        <section>
-          <h3 data-i18n="rules.2.t">2 · TURNS</h3>
-          <p data-i18n="rules.2.p">Players take turns occupying free cells: X is a cyan cross, O is a magenta circle. X moves first in the first round; the starting player alternates every following round.</p>
-        </section>
-        <section>
-          <h3 data-i18n="rules.3.t">3 · WIN AND DRAW</h3>
-          <p data-i18n="rules.3.p">To win, assemble a line of {n} of your symbols along any straight line of four-dimensional space:</p>
-          <ul>
-            <li data-i18n="rules.3.li1">along an axis — within a single dimension;</li>
-            <li data-i18n="rules.3.li2">a slice diagonal — in the plane of two dimensions;</li>
-            <li data-i18n="rules.3.li3">a cube diagonal — through the volume of three dimensions;</li>
-            <li data-i18n="rules.3.li4">a hypercube diagonal — through all four dimensions.</li>
-          </ul>
-          <p data-i18n="rules.3.p2">There are {lines} such lines. A draw is when all playable cells are occupied and there is no line. The winning line is highlighted on the board — the victory window can be collapsed and the combination analyzed.</p>
-        </section>
-        <section>
-          <h3 data-i18n="rules.4.t">4 · THE FIELD</h3>
-          <p data-i18n-html="rules.4.p"><b>HYPERCUBE</b> — {dims}, {cells} cells, {n} in a row to win. An unrestricted field with deep, honest competition.</p>
-        </section>
-        <section>
-          <h3 data-i18n="rules.5.t">5 · OPPONENTS</h3>
-          <ul>
-            <li data-i18n-html="rules.5.li1"><b>HOT-SEAT</b> — two humans take turns on one device.</li>
-            <li data-i18n-html="rules.5.li2"><b>SCRIPT KIDDIE AI</b> — noise and randomness, occasionally notices the obvious.</li>
-            <li data-i18n-html="rules.5.li3"><b>NETRUNNER AI</b> — a greedy heuristic: wins, blocks, pulls the best lines.</li>
-            <li data-i18n-html="rules.5.li4"><b>CORPORATE AI</b> — alpha-beta search evaluating every line; thinks for up to ~1 second.</li>
-            <li data-i18n-html="rules.5.li5"><b>ONLINE</b> — direct p2p link between two devices (WebRTC). The host opens a room, plays X and shares the code or invite link; the guest joins as O.</li>
-          </ul>
-        </section>
-        <section>
-          <h3 data-i18n="rules.6.t">6 · MATCH</h3>
-          <p data-i18n="rules.6.p">X wins, O wins and draws are accumulated across rounds. Changing the opponent starts a new match and resets the score.</p>
-        </section>
-      </div>
-      <div class="overlay-actions">
-        <button id="btn-rules-close" class="btn-primary" data-i18n="btn.rules.close">✕ CLOSE</button>
       </div>
     </div>
-  </div>
 
-  <script defer src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/game.js"></script>
-  <script src="js/ai.js"></script>
-  <script src="js/match.js"></script>
-  <script src="js/net.js"></script>
-  <script src="js/session.js"></script>
-  <script src="js/app.js"></script>
-</body>
+    <!-- NET LINK OVERLAY -->
+    <div id="net-overlay" class="overlay hidden">
+      <div class="overlay-box panel">
+        <h2 id="net-overlay-title" class="glitch t-net"></h2>
+        <p id="net-overlay-sub" class="overlay-sub"></p>
+        <div class="overlay-actions">
+          <button id="btn-net-menu" class="btn-primary" data-i18n="btn.menu">MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RULES OVERLAY -->
+    <div id="rules-overlay" class="overlay hidden">
+      <div class="overlay-box panel rules-panel">
+        <h2 class="rules-title" data-i18n="rules.title">// PROTOCOL: HYPERFIELD RULES</h2>
+        <div class="rules-body">
+          <section>
+            <h3 data-i18n="rules.1.t">1 · HYPERFIELD</h3>
+            <p data-i18n="rules.1.p">
+              The game is played in a four-dimensional cube n×n×n×n. Every cell is addressed by four
+              coordinates (w, x, y, z). For humans, the hyperfield is displayed as a grid of slices:
+              the grid rows are the w coordinate, the columns are x; inside a slice, rows are y and
+              columns are z.
+            </p>
+          </section>
+          <section>
+            <h3 data-i18n="rules.2.t">2 · TURNS</h3>
+            <p data-i18n="rules.2.p">
+              Players take turns occupying free cells: X is a cyan cross, O is a magenta circle. X
+              moves first in the first round; the starting player alternates every following round.
+            </p>
+          </section>
+          <section>
+            <h3 data-i18n="rules.3.t">3 · WIN AND DRAW</h3>
+            <p data-i18n="rules.3.p">
+              To win, assemble a line of {n} of your symbols along any straight line of
+              four-dimensional space:
+            </p>
+            <ul>
+              <li data-i18n="rules.3.li1">along an axis — within a single dimension;</li>
+              <li data-i18n="rules.3.li2">a slice diagonal — in the plane of two dimensions;</li>
+              <li data-i18n="rules.3.li3">
+                a cube diagonal — through the volume of three dimensions;
+              </li>
+              <li data-i18n="rules.3.li4">a hypercube diagonal — through all four dimensions.</li>
+            </ul>
+            <p data-i18n="rules.3.p2">
+              There are {lines} such lines. A draw is when all playable cells are occupied and there
+              is no line. The winning line is highlighted on the board — the victory window can be
+              collapsed and the combination analyzed.
+            </p>
+          </section>
+          <section>
+            <h3 data-i18n="rules.4.t">4 · THE FIELD</h3>
+            <p data-i18n-html="rules.4.p">
+              <b>HYPERCUBE</b> — {dims}, {cells} cells, {n} in a row to win. An unrestricted field
+              with deep, honest competition.
+            </p>
+          </section>
+          <section>
+            <h3 data-i18n="rules.5.t">5 · OPPONENTS</h3>
+            <ul>
+              <li data-i18n-html="rules.5.li1">
+                <b>HOT-SEAT</b> — two humans take turns on one device.
+              </li>
+              <li data-i18n-html="rules.5.li2">
+                <b>SCRIPT KIDDIE AI</b> — noise and randomness, occasionally notices the obvious.
+              </li>
+              <li data-i18n-html="rules.5.li3">
+                <b>NETRUNNER AI</b> — a greedy heuristic: wins, blocks, pulls the best lines.
+              </li>
+              <li data-i18n-html="rules.5.li4">
+                <b>CORPORATE AI</b> — alpha-beta search evaluating every line; thinks for up to ~1
+                second.
+              </li>
+              <li data-i18n-html="rules.5.li5">
+                <b>ONLINE</b> — direct p2p link between two devices (WebRTC). The host opens a room,
+                plays X and shares the code or invite link; the guest joins as O.
+              </li>
+            </ul>
+          </section>
+          <section>
+            <h3 data-i18n="rules.6.t">6 · MATCH</h3>
+            <p data-i18n="rules.6.p">
+              X wins, O wins and draws are accumulated across rounds. Changing the opponent starts a
+              new match and resets the score.
+            </p>
+          </section>
+        </div>
+        <div class="overlay-actions">
+          <button id="btn-rules-close" class="btn-primary" data-i18n="btn.rules.close">
+            ✕ CLOSE
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
 </html>

@@ -1,11 +1,13 @@
-'use strict';
-
 /* Синтезированные звуки на WebAudio — без внешних файлов. */
 const AudioFX = (() => {
   let ctx = null;
   let master = null;
   let muted = false;
-  try { muted = localStorage.getItem('xo4d.muted') === '1'; } catch (e) { /* приватный режим */ }
+  try {
+    muted = localStorage.getItem('xo4d.muted') === '1';
+  } catch {
+    /* приватный режим */
+  }
 
   function ensure() {
     if (!ctx) {
@@ -54,24 +56,49 @@ const AudioFX = (() => {
   }
 
   return {
-    unlock() { ensure(); },
-    get muted() { return muted; },
+    unlock() {
+      ensure();
+    },
+    get muted() {
+      return muted;
+    },
     toggle() {
       muted = !muted;
-      try { localStorage.setItem('xo4d.muted', muted ? '1' : '0'); } catch (e) { /* игнорируем */ }
+      try {
+        localStorage.setItem('xo4d.muted', muted ? '1' : '0');
+      } catch {
+        /* игнорируем */
+      }
       if (master) master.gain.value = muted ? 0 : 0.5;
       return muted;
     },
-    click()  { tone(1300, 0.045, 'square', 0.08); },
-    error()  { tone(110, 0.14, 'sawtooth', 0.18); },
-    moveX()  { tone(720, 0.09, 'square', 0.16, 0, 980); },
-    moveO()  { tone(300, 0.11, 'sawtooth', 0.15, 0, 210); },
-    aiThink(){ tone(180, 0.3, 'sine', 0.06, 0, 240); },
+    click() {
+      tone(1300, 0.045, 'square', 0.08);
+    },
+    error() {
+      tone(110, 0.14, 'sawtooth', 0.18);
+    },
+    moveX() {
+      tone(720, 0.09, 'square', 0.16, 0, 980);
+    },
+    moveO() {
+      tone(300, 0.11, 'sawtooth', 0.15, 0, 210);
+    },
+    aiThink() {
+      tone(180, 0.3, 'sine', 0.06, 0, 240);
+    },
     win() {
       [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.16, 'square', 0.15, i * 0.09));
       noise(0.5, 0.08, 0.1);
     },
-    lose() { [392, 311, 233, 155].forEach((f, i) => tone(f, 0.2, 'sawtooth', 0.13, i * 0.12)); },
-    draw() { tone(440, 0.22, 'sine', 0.12); tone(440, 0.22, 'sine', 0.12, 0.28); },
+    lose() {
+      [392, 311, 233, 155].forEach((f, i) => tone(f, 0.2, 'sawtooth', 0.13, i * 0.12));
+    },
+    draw() {
+      tone(440, 0.22, 'sine', 0.12);
+      tone(440, 0.22, 'sine', 0.12, 0.28);
+    },
   };
 })();
+
+export default AudioFX;

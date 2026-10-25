@@ -1,5 +1,3 @@
-'use strict';
-
 /*
  * Сетевой протокол и синхронизация матча: host-авторитарная сессия (ADR-0006).
  *
@@ -11,7 +9,8 @@
  * INTERFACE:
  *   Session.PROTOCOL        — версия протокола; несовпадение = отказ в рукопожатии.
  *   Session.checkHello(msg) → true, если hello корректен (матч хост создаёт после него).
- *   Session.host({ core, match, send }) → { kind: 'host', onData(msg) → результат, snapshot() }
+ *   Session.host({ core, match }) → { kind: 'host', onData(msg) → результат, snapshot() }
+ *     (рассылку снапшотов ведёт app: политика «когда отправлять» — не протокольная забота)
  *     onData применяет к матчу ход/переход гостя: { kind: 'move'|'next'|'restart'|'bye'|'ignore',
  *     changed, mover, idx }; snapshot() → сообщение-снапшот для отправки.
  *   Session.guest({ core, n, send }) → { kind: 'guest', view, onData(msg), move(idx), next(), restart() }
@@ -48,7 +47,7 @@ const Session = (() => {
     return !!msg && msg.t === 'hello' && msg.v === PROTOCOL;
   }
 
-  function host({ core, match, send }) {
+  function host({ core, match }) {
     function onData(msg) {
       if (!msg || typeof msg !== 'object') return { kind: 'ignore' };
       if (msg.t === 'move' && Number.isInteger(msg.idx)) {
@@ -136,5 +135,4 @@ const Session = (() => {
   return { PROTOCOL, checkHello, host, guest };
 })();
 
-/* Загрузка в Node без этапа сборки: в браузере module не существует. */
-if (typeof module !== 'undefined' && module.exports) module.exports = Session;
+export default Session;

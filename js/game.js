@@ -1,5 +1,3 @@
-'use strict';
-
 /*
  * Ядро игры «Гиперполе»: четырёхмерный куб n×n×n×n.
  *
@@ -36,7 +34,10 @@ const GameCore = (() => {
     for (let mask = 0; mask < 81; mask++) {
       const v = [0, 0, 0, 0];
       let m = mask;
-      for (let i = 0; i < 4; i++) { v[i] = (m % 3) - 1; m = Math.floor(m / 3); }
+      for (let i = 0; i < 4; i++) {
+        v[i] = (m % 3) - 1;
+        m = Math.floor(m / 3);
+      }
       let f = 0;
       while (f < 4 && v[f] === 0) f++;
       if (f === 4 || v[f] !== 1) continue;
@@ -60,10 +61,19 @@ const GameCore = (() => {
           else if (v[i] === -1) s[i] = n - 1;
         }
         let t = k;
-        for (let j = 0; j < free.length; j++) { s[free[j]] = t % n; t = Math.floor(t / n); }
-        const line = new Array(n);
+        for (let j = 0; j < free.length; j++) {
+          s[free[j]] = t % n;
+          t = Math.floor(t / n);
+        }
+        const line = Array.from({ length: n });
         for (let step = 0; step < n; step++) {
-          line[step] = idxOf(n, s[0] + v[0] * step, s[1] + v[1] * step, s[2] + v[2] * step, s[3] + v[3] * step);
+          line[step] = idxOf(
+            n,
+            s[0] + v[0] * step,
+            s[1] + v[1] * step,
+            s[2] + v[2] * step,
+            s[3] + v[3] * step,
+          );
         }
         lines.push(line);
       }
@@ -86,7 +96,7 @@ const GameCore = (() => {
       cells: new Int8Array(cellCount),
       turn: starter,
       moveCount: 0,
-      winner: 0,      // 0 — партия идёт
+      winner: 0, // 0 — партия идёт
       winLine: null,
       lastMove: -1,
     };
@@ -109,7 +119,10 @@ const GameCore = (() => {
       const line = lines[li];
       let ok = true;
       for (let i = 0; i < line.length; i++) {
-        if (cells[line[i]] !== player) { ok = false; break; }
+        if (cells[line[i]] !== player) {
+          ok = false;
+          break;
+        }
       }
       if (ok) return line;
     }
@@ -136,5 +149,4 @@ const GameCore = (() => {
   return { X, O, DRAW, create, applyMove, lineWinsFor, idxOf, facts };
 })();
 
-/* Загрузка в Node без этапа сборки: в браузере module не существует. */
-if (typeof module !== 'undefined' && module.exports) module.exports = GameCore;
+export default GameCore;

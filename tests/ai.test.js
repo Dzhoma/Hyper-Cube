@@ -1,9 +1,8 @@
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert');
-const AI = require('../js/ai.js');
-const GameCore = require('../js/game.js');
-const { mulberry32 } = require('./helpers.js');
+import { test } from 'node:test';
+import assert from 'node:assert';
+import AI from '../js/ai.js';
+import GameCore from '../js/game.js';
+import { mulberry32 } from './helpers.js';
 
 /* X занимает 0,1,2 — фор на клетку 3 (ось z среза 0.0); O вдали, парой. */
 function almostWon() {
@@ -44,6 +43,12 @@ test('rng-инъекция делает уровень 0 детерминиро�
 
 test('delayFor живёт на seam ИИ: 120 мс у поиска, 280–540 у прочих', () => {
   assert.equal(AI.delayFor(2), 120);
-  assert.equal(AI.delayFor(0, () => 0), 280);
-  assert.equal(AI.delayFor(1, () => 1), 540);
+  assert.equal(
+    AI.delayFor(0, () => 0),
+    280,
+  );
+  assert.equal(
+    AI.delayFor(1, () => 1),
+    540,
+  );
 });

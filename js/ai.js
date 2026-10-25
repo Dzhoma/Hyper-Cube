@@ -1,5 +1,3 @@
-'use strict';
-
 /*
  * ИИ трёх уровней:
  *   0 «Скрип-кидди»      — случайность с редкими тактическими рефлексами;
@@ -49,10 +47,12 @@ const AI = (() => {
     let occupied = 0;
     for (let li = 0; li < L; li++) {
       const line = state.lines[li];
-      let a = 0, b = 0;
+      let a = 0,
+        b = 0;
       for (let i = 0; i < line.length; i++) {
         const v = this.cells[line[i]];
-        if (v === 1) a++; else if (v === 2) b++;
+        if (v === 1) a++;
+        else if (v === 2) b++;
       }
       this.cx[li] = a;
       this.co[li] = b;
@@ -63,8 +63,9 @@ const AI = (() => {
     this.score = score;
 
     /* статический порядок перебора: клетки, лежащие на большем числе линий, первыми */
-    this.order = Array.from({ length: this.cells.length }, (_, i) => i)
-      .sort((x, y) => state.cellLines[y].length - state.cellLines[x].length);
+    this.order = Array.from({ length: this.cells.length }, (_, i) => i).sort(
+      (x, y) => state.cellLines[y].length - state.cellLines[x].length,
+    );
 
     this.nodes = 0;
     this.deadline = Infinity;
@@ -78,7 +79,8 @@ const AI = (() => {
     for (let i = 0; i < cls.length; i++) {
       const li = cls[i];
       const old = lineScore(this.w, this.cx[li], this.co[li]);
-      if (isX) this.cx[li]++; else this.co[li]++;
+      if (isX) this.cx[li]++;
+      else this.co[li]++;
       this.score += lineScore(this.w, this.cx[li], this.co[li]) - old;
     }
   };
@@ -91,7 +93,8 @@ const AI = (() => {
     for (let i = 0; i < cls.length; i++) {
       const li = cls[i];
       const old = lineScore(this.w, this.cx[li], this.co[li]);
-      if (isX) this.cx[li]--; else this.co[li]--;
+      if (isX) this.cx[li]--;
+      else this.co[li]--;
       this.score += lineScore(this.w, this.cx[li], this.co[li]) - old;
     }
   };
@@ -102,7 +105,10 @@ const AI = (() => {
       const line = this.lines[cls[i]];
       let ok = true;
       for (let j = 0; j < line.length; j++) {
-        if (this.cells[line[j]] !== player) { ok = false; break; }
+        if (this.cells[line[j]] !== player) {
+          ok = false;
+          break;
+        }
       }
       if (ok) return true;
     }
@@ -171,14 +177,19 @@ const AI = (() => {
     return res;
   }
 
-  function pickRandom(arr, rng) { return arr[(rng() * arr.length) | 0]; }
+  function pickRandom(arr, rng) {
+    return arr[(rng() * arr.length) | 0];
+  }
 
   function bestByGain(eng, moves, player, rng) {
     let best = moves[0];
     let bestG = -Infinity;
     for (const m of moves) {
       const g = moveGain(eng, m, player) + rng() * 1e-6;
-      if (g > bestG) { bestG = g; best = m; }
+      if (g > bestG) {
+        bestG = g;
+        best = m;
+      }
     }
     return best;
   }
@@ -214,8 +225,10 @@ const AI = (() => {
     for (let idx = 0; idx < eng.cells.length; idx++) {
       if (eng.cells[idx] !== 0) continue;
       const g = moveGain(eng, idx, player);
-      if (g > bestG + 1e-9) { bestG = g; ties = [idx]; }
-      else if (Math.abs(g - bestG) <= 1e-9) ties.push(idx);
+      if (g > bestG + 1e-9) {
+        bestG = g;
+        ties = [idx];
+      } else if (Math.abs(g - bestG) <= 1e-9) ties.push(idx);
     }
     return pickRandom(ties, rng);
   }
@@ -252,7 +265,10 @@ const AI = (() => {
           else if (eng.empty === 0) v = 0;
           else v = -eng.negamax(depth - 1, -INF, -alpha, 3 - player, 1);
           eng.unmake(m, player);
-          if (localBest === null || v > alpha) { alpha = v; localBest = m; }
+          if (localBest === null || v > alpha) {
+            alpha = v;
+            localBest = m;
+          }
         }
       } catch (e) {
         if (e !== TIMEOUT) throw e;
@@ -260,8 +276,8 @@ const AI = (() => {
       }
       best = localBest;
       rootMoves = [best].concat(rootMoves.filter((x) => x !== best)); // PV-ход первым
-      if (alpha >= WIN - 100) break;       // форсированный выигрыш найден
-      if (alpha <= -(WIN - 100)) break;    // всё проиграно — играем лучшее сопротивление
+      if (alpha >= WIN - 100) break; // форсированный выигрыш найден
+      if (alpha <= -(WIN - 100)) break; // всё проиграно — играем лучшее сопротивление
     }
     return best;
   }
@@ -281,5 +297,4 @@ const AI = (() => {
   return { choose, delayFor };
 })();
 
-/* Загрузка в Node без этапа сборки: в браузере module не существует. */
-if (typeof module !== 'undefined' && module.exports) module.exports = AI;
+export default AI;

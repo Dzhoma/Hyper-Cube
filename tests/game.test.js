@@ -1,7 +1,6 @@
-'use strict';
-const { test } = require('node:test');
-const assert = require('node:assert');
-const GameCore = require('../js/game.js');
+import { test } from 'node:test';
+import assert from 'node:assert';
+import GameCore from '../js/game.js';
 
 test('create(4): 256 клеток, 520 линий, старт по умолчанию X', () => {
   const g = GameCore.create(4);

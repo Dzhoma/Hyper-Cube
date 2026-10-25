@@ -1,5 +1,3 @@
-'use strict';
-
 /*
  * Матч: серия раундов с общим счётом побед X, O и ничьих.
  *
@@ -24,7 +22,6 @@
  * restartRound() сохраняет стартёра; счёт растёт ровно один раз за раунд.
  */
 const Match = (() => {
-
   function create(config, deps) {
     const { core, ai, rng = Math.random } = deps;
     const score = { X: 0, O: 0, D: 0 };
@@ -53,8 +50,12 @@ const Match = (() => {
     }
 
     function isAiTurn() {
-      return !!game && !game.winner &&
-        config.opponent === 'ai' && game.turn !== sideCode(config.humanSide);
+      return (
+        !!game &&
+        !game.winner &&
+        config.opponent === 'ai' &&
+        game.turn !== sideCode(config.humanSide)
+      );
     }
 
     function aiMove() {
@@ -64,21 +65,39 @@ const Match = (() => {
     }
 
     return {
-      newMatch() { score.X = 0; score.O = 0; score.D = 0; round = 0; startRound(); },
-      nextRound() { round++; startRound(); },
-      restartRound() { startRound(); }, // тот же номер раунда — тот же стартёр
+      newMatch() {
+        score.X = 0;
+        score.O = 0;
+        score.D = 0;
+        round = 0;
+        startRound();
+      },
+      nextRound() {
+        round++;
+        startRound();
+      },
+      restartRound() {
+        startRound();
+      }, // тот же номер раунда — тот же стартёр
       play,
       aiMove,
       isAiTurn,
-      get game() { return game; },
-      get score() { return score; },
-      get round() { return round; },
-      get config() { return config; },
+      get game() {
+        return game;
+      },
+      get score() {
+        return score;
+      },
+      get round() {
+        return round;
+      },
+      get config() {
+        return config;
+      },
     };
   }
 
   return { create };
 })();
 
-/* Загрузка в Node без этапа сборки: в браузере module не существует. */
-if (typeof module !== 'undefined' && module.exports) module.exports = Match;
+export default Match;

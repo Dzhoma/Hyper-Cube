@@ -2,8 +2,8 @@
 
 Tic-tac-toe in four-dimensional space with a cyberpunk aesthetic. Play against
 another human (hot-seat or online over a direct P2P link) or against the AI.
-Pure static site — no frameworks, no build step, no dependencies: just open
-`index.html`.
+No frameworks — plain ES modules; [Vite](https://vite.dev) serves development
+and builds the static bundle for GitHub Pages.
 
 [По-русски ниже](#hyper-cube-по-русски)
 
@@ -15,9 +15,9 @@ Pure static site — no frameworks, no build step, no dependencies: just open
 - **Opponents** — hot-seat for two players, online P2P (WebRTC: the host opens
   a room and shares a short code or an invite link; no accounts, no server),
   or AI with three levels:
-  - *Script Kiddie* — noise and randomness;
-  - *Netrunner* — greedy heuristic;
-  - *Corporate AI* — alpha-beta search with incremental line evaluation and
+  - _Script Kiddie_ — noise and randomness;
+  - _Netrunner_ — greedy heuristic;
+  - _Corporate AI_ — alpha-beta search with incremental line evaluation and
     iterative deepening, ~1 second thinking budget.
 - **Match scoring** — X/O/draw counters; the starting player alternates every round.
 - **Post-game analysis** — the winning line stays highlighted on the board and
@@ -28,15 +28,21 @@ Pure static site — no frameworks, no build step, no dependencies: just open
 
 ## Run locally
 
-Open `index.html` in any modern browser. That's it — no server, no build.
+Requires Node 20.19+ / 22.12+ (tested on Node 24):
+
+```
+npm install
+npm run dev       # dev server with HMR
+npm run build     # production build into dist/
+npm run preview   # serve the production build locally
+npm test          # node:test suites (no dependencies needed)
+npm run lint      # oxlint
+npm run format    # oxfmt
+```
 
 ## Tests
 
-Requires Node 18+:
-
-```
-node --test tests/
-```
+`npm test` runs `node --test` — no dependencies required beyond Node itself.
 
 The suites cover the 4D core (line generation, wins), all three AI levels
 (deterministic via an injected RNG), the match state machine (fake AI adapter)
@@ -50,12 +56,12 @@ The repository ships with a ready deployment pipeline:
 2. In the repository, open **Settings → Pages → Build and deployment → Source**
    and select **GitHub Actions**.
 3. On every push to `main` the workflow
-   [.github/workflows/deploy.yml](.github/workflows/deploy.yml) runs
-   `scripts/build.sh`, which assembles the site into `dist/`, and publishes it.
+   [.github/workflows/deploy.yml](.github/workflows/deploy.yml) installs
+   dependencies, runs the Vite build and publishes `dist/`.
 4. The game will be available at `https://<username>.github.io/<repository>/`.
 
-To build locally: `bash scripts/build.sh` (on Windows: `scripts\build.cmd`) —
-the ready-to-publish copy appears in `dist/`.
+To build locally: `npm run build` — the ready-to-publish copy appears in
+`dist/`; `npm run preview` serves it.
 
 ## Project structure
 
@@ -65,13 +71,14 @@ css/style.css         cyberpunk styling (neon, scanlines, glitch)
 js/game.js            core: 4D board, line generation, win detection
 js/ai.js              three AI levels (random / heuristic / alpha-beta)
 js/match.js           match logic: rounds, starter alternation, scoring
-js/net.js             P2P transport adapter over PeerJS (WebRTC)
+js/net.js             P2P transport adapter over PeerJS (WebRTC, lazy import)
 js/session.js         network protocol: host-authoritative sync, snapshots
+js/i18n.js            UI dictionary (EN/RU) and language state
 js/audio.js           synthesized WebAudio sounds
 js/app.js             i18n (EN/RU), menu, rendering
+vite.config.js        Vite config: relative base for Pages subpath
+package.json          npm scripts: dev / build / preview / test
 tests/                node:test suites: core, AI, match, network session
-scripts/build.sh      assembles dist/ for GitHub Pages
-scripts/build.cmd     the same for Windows
 docs/adr/             architecture decision records
 CONTEXT.md            project glossary
 ```
@@ -84,8 +91,9 @@ CONTEXT.md            project glossary
 короткий код или ссылку-приглашение; без аккаунтов и сервера) или ИИ трёх
 уровней — «Скрип-кидди», «Нетраннер», «Корпоративный ИИ». Счёт ведётся между
 раундами, стартёр чередуется. Интерфейс — русский и английский (по умолчанию
-английский, выбор в меню). Для запуска просто откройте `index.html` в браузере.
-Логика покрыта тестами: `node --test tests/` (ядро, ИИ, матч, сетевая сессия).
+английский, выбор в меню). Запуск: `npm install`, затем `npm run dev` — сборка
+и сервер берутся из Vite. Логика покрыта тестами: `npm test` (ядро, ИИ, матч,
+сетевая сессия).
 
 ## License
 
