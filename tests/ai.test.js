@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import AI from '../js/ai.js';
-import GameCore from '../js/game.js';
+import AI from '../js/games/hypercube/ai.js';
+import GameCore from '../js/games/hypercube/game.js';
 import { mulberry32 } from './helpers.js';
 
 /* X занимает 0,1,2 — фор на клетку 3 (ось z среза 0.0); O вдали, парой. */

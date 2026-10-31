@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import Session from '../js/session.js';
-import Net from '../js/net.js';
-import GameCore from '../js/game.js';
-import Match from '../js/match.js';
+import Session from '../js/games/hypercube/session.js';
+import Net from '../js/games/hypercube/net.js';
+import GameCore from '../js/games/hypercube/game.js';
+import Match from '../js/games/hypercube/match.js';
 import { mulberry32 } from './helpers.js';
 
 /* Транспорт гостя: отправка попадает в «входящие» хоста; хост рассылает сам через snapshot(). */

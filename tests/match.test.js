@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import Match from '../js/match.js';
-import GameCore from '../js/game.js';
+import Match from '../js/games/hypercube/match.js';
+import GameCore from '../js/games/hypercube/game.js';
 import { mulberry32 } from './helpers.js';
 
 /* Фейковый ИИ: зовётся, как настоящий, но играет «первую пустую от idx». */

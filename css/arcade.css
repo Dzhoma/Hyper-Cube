@@ -1,0 +1,113 @@
+/* ============================================================
+   АРКАДА: каталог игр + змейка (темы — в style.css)
+   ============================================================ */
+
+/* ---------- каталог: главное меню ---------- */
+
+#screen-cat {
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  padding: 40px 20px;
+}
+.cat-lang {
+  margin-top: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+.catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 320px));
+  justify-content: center;
+  gap: 22px;
+  width: min(880px, 94vw);
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 26px 24px 22px;
+  text-decoration: none;
+  background: rgba(0, 240, 255, 0.03);
+  border: 1px solid var(--line);
+  transition:
+    transform 0.15s ease-out,
+    border-color 0.15s ease-out,
+    box-shadow 0.15s ease-out;
+}
+.card-name {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--c-cyan);
+  text-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+}
+.card[data-accent='magenta'] .card-name,
+.card[data-accent='magenta'] .card-play {
+  color: var(--c-magenta);
+  text-shadow: 0 0 12px rgba(255, 43, 214, 0.5);
+}
+.card-tag {
+  color: var(--c-dim);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  line-height: 1.6;
+  min-height: 2.6em;
+}
+.card-play {
+  margin-top: 8px;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  color: var(--c-cyan);
+}
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--c-cyan);
+  box-shadow:
+    0 0 24px rgba(0, 240, 255, 0.22),
+    inset 0 0 20px rgba(0, 240, 255, 0.05);
+  outline: none;
+}
+.card[data-accent='magenta']:hover,
+.card[data-accent='magenta']:focus-visible {
+  border-color: var(--c-magenta);
+  box-shadow:
+    0 0 24px rgba(255, 43, 214, 0.22),
+    inset 0 0 20px rgba(255, 43, 214, 0.05);
+}
+
+/* кнопка возврата в аркаду */
+.menu-head .btn-exit {
+  margin-bottom: 18px;
+}
+
+/* ---------- змейка ---------- */
+
+#screen-snake {
+  align-items: center;
+  gap: 18px;
+  padding: 24px 16px;
+}
+.snake-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+#snake-canvas {
+  width: min(520px, 92vw);
+  aspect-ratio: 1 / 1;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow:
+    0 0 30px rgba(0, 240, 255, 0.12),
+    inset 0 0 30px rgba(0, 240, 255, 0.05);
+  background: #04040a;
+  touch-action: none;
+}
+#sn-overlay-title {
+  color: var(--c-magenta);
+  text-shadow:
+    0 0 10px rgba(255, 43, 214, 0.8),
+    0 0 40px rgba(255, 43, 214, 0.4);
+}

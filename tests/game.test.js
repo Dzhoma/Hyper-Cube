@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import GameCore from '../js/game.js';
+import GameCore from '../js/games/hypercube/game.js';
 
 test('create(4): 256 клеток, 520 линий, старт по умолчанию X', () => {
   const g = GameCore.create(4);

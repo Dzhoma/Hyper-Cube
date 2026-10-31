@@ -1,0 +1,31 @@
+<!-- SCREEN: SNAKE -->
+<section id="screen-snake" class="screen">
+  <header class="game-head">
+    <div class="head-left">
+      <span class="brand" data-i18n="cat.snake.name">SNAKE</span>
+      <span class="mode-tag" data-i18n="sn.tag">// NEON SERPENT</span>
+    </div>
+    <div class="score snake-hud" id="snake-hud"></div>
+    <div class="head-right">
+      <button class="btn-ghost" id="snake-restart" data-i18n="btn.restart">⟲ RESTART</button>
+      <button class="btn-ghost" id="snake-exit">◄ <span data-i18n="cat.back">ARCADE</span></button>
+    </div>
+  </header>
+
+  <div class="snake-wrap">
+    <canvas id="snake-canvas" width="520" height="520"></canvas>
+  </div>
+
+  <p class="board-hint" data-i18n="sn.hint">ARROWS / WASD TO STEER · SWIPE ON TOUCH</p>
+
+  <div id="sn-overlay" class="overlay hidden">
+    <div class="overlay-box panel">
+      <h2 id="sn-overlay-title" class="glitch"></h2>
+      <p id="sn-overlay-sub" class="overlay-sub"></p>
+      <div class="overlay-actions">
+        <button id="sn-again" class="btn-primary" data-i18n="btn.restart">⟲ RESTART</button>
+        <button id="sn-exit" class="btn-ghost">◄ <span data-i18n="cat.back">ARCADE</span></button>
+      </div>
+    </div>
+  </div>
+</section>
