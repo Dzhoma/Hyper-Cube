@@ -1,0 +1,52 @@
+<!-- SCREEN: HYPER-MAZE -->
+<section id="screen-hypermaze" class="screen">
+  <header class="game-head">
+    <div class="head-left">
+      <span class="brand" data-i18n="cat.hm.name">HYPER-MAZE</span>
+      <span class="mode-tag" data-i18n="hm.tag">// PERFECT 4D MAZE</span>
+    </div>
+    <div class="score snake-hud" id="hm-hud"></div>
+    <div class="head-right">
+      <button class="btn-ghost" id="hm-new" data-i18n="hm.new">⟲ NEW MAZE</button>
+      <button class="btn-ghost" id="hm-exit">◄ <span data-i18n="cat.back">ARCADE</span></button>
+    </div>
+  </header>
+
+  <div class="snake-wrap">
+    <canvas id="hm-canvas"></canvas>
+  </div>
+
+  <div class="hm-pads">
+    <div class="hm-pad" id="hm-pad-panels">
+      <span class="hm-pad-label" data-i18n="hm.pad.panels">PANELS ±W ±X</span>
+      <div class="hm-pad-grid">
+        <button class="hm-key" data-dir="1" aria-label="ana -w">−W</button>
+        <button class="hm-key" data-dir="3" aria-label="-x">−X</button>
+        <button class="hm-key" data-dir="2" aria-label="+x">+X</button>
+        <button class="hm-key" data-dir="0" aria-label="kata +w">+W</button>
+      </div>
+    </div>
+    <div class="hm-pad" id="hm-pad-slice">
+      <span class="hm-pad-label" data-i18n="hm.pad.slice">SLICE ±Y ±Z</span>
+      <div class="hm-pad-grid">
+        <button class="hm-key" data-dir="5" aria-label="-y">↑</button>
+        <button class="hm-key" data-dir="7" aria-label="-z">←</button>
+        <button class="hm-key" data-dir="6" aria-label="+z">→</button>
+        <button class="hm-key" data-dir="4" aria-label="+y">↓</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="board-hint" data-i18n="hm.hint">ARROWS ±Y/±Z · Q/E ANA-KATA (±W) · R/F ±X</p>
+
+  <div id="hm-overlay" class="overlay hidden">
+    <div class="overlay-box panel">
+      <h2 id="hm-overlay-title" class="glitch"></h2>
+      <p id="hm-overlay-sub" class="overlay-sub"></p>
+      <div class="overlay-actions">
+        <button id="hm-again" class="btn-primary" data-i18n="hm.new">⟲ NEW MAZE</button>
+        <button id="hm-exit2" class="btn-ghost">◄ <span data-i18n="cat.back">ARCADE</span></button>
+      </div>
+    </div>
+  </div>
+</section>

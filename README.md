@@ -30,11 +30,25 @@ GitHub Pages.
 - Neon canvas serpent: eat, grow, survive; the speed ramps up with every meal.
 - Keyboard (arrows / WASD) and touch swipe; local best score.
 
+### Hyper-Maze — perfect 4D maze
+
+- **Perfect maze in a 4×4×4×4 hypercube** (256 cells): a spanning tree, so
+  exactly one path leads from the start corner to the finish corner — and it
+  necessarily includes ana/kata steps along the fourth axis.
+- **Full slice-map** — 16 panels (w, x) of 4×4 cells (y, z): walls as lines,
+  W/X passages as portal arrows on the cell edges; the puzzle is reading the
+  4D structure, not exploring it.
+- **8 absolute directions** — arrows move within a slice (±Y/±Z), W/S step
+  between layers (ana/kata, ±W), A/D between panel columns (±X); on-screen
+  button crosses for touch.
+- **Steps + timer** with a local best-time record; a fresh maze every run.
+
 ## Arcade shell
 
 - **Main menu** — a catalog of game cards with a language switcher (English by
   default, Russian available), hash-routed: `#/` is the catalog,
-  `#/hypercube` and `#/snake` are the games, so direct links and reloads work.
+  `#/hypercube`, `#/snake` and `#/hypermaze` are the games, so direct links
+  and reloads work.
 - **Adding a game** — create `js/games/<id>/` with a default-exported
   descriptor `{ id, nameKey, tagKey, accent, mount, unmount }` (mount builds
   the screen from `screen.html`, unmount stops timers/network) and add one
@@ -61,8 +75,9 @@ npm run format    # oxfmt
 
 The suites cover the 4D core (line generation, wins), all three AI levels
 (deterministic via an injected RNG), the match state machine (fake AI adapter),
-the network session (host/guest over a fake transport pair) and the snake core
-(movement, growth, collisions, victory).
+the network session (host/guest over a fake transport pair), the snake core
+(movement, growth, collisions, victory) and the maze core (perfect maze
+connectivity, symmetry, the W-step in the start→finish path, determinism).
 
 ## Deploy to GitHub Pages
 
@@ -96,9 +111,12 @@ js/games/hypercube/         4D tic-tac-toe: game, ai, match, net, session,
                             screen.js (UI layer), screen.html
 js/games/snake/             Snake: core.js (pure logic), index.js (canvas UI),
                             screen.html
+js/games/hypermaze/         Hyper-Maze: core.js (pure 4D maze), index.js
+                            (canvas UI), screen.html
 vite.config.js              Vite config: relative base for Pages subpath
 package.json                npm scripts: dev / build / preview / test
-tests/                      node:test suites: core, AI, match, session, snake
+tests/                      node:test suites: core, AI, match, session, snake,
+                            maze
 docs/adr/                   architecture decision records
 CONTEXT.md                  project glossary
 ```
@@ -119,14 +137,23 @@ CONTEXT.md                  project glossary
 **Змейка** — неоновая змея на канвасе: ешь, расти, выживай; скорость растёт с
 каждой добычей. Управление — стрелки/WASD и свайп; рекорд хранится локально.
 
+**Гиперлабиринт** — идеальный лабиринт в гиперкубе 4×4×4×4 (256 ячеек): от
+старта до финиша ведёт ровно один путь, и он обязательно включает шаги по
+четвёртой оси (ана/ката). Полная карта из 16 срезов: стены — линии, переходы
+по W/X — стрелки-порталы; головоломка в чтении 4D-структуры. Управление —
+абсолютные оси: стрелки внутри среза, W/S — ана/ката, A/D — между столбцами
+панелей; шаги и время, рекорд хранится локально.
+
 **Оболочка** — главное меню с каталогом игр и выбором языка (по умолчанию
 английский, доступен русский), навигация по хешу: `#/` — каталог,
-`#/hypercube` и `#/snake` — игры. Добавить игру: модуль `js/games/<id>/` с
-дескриптором `{ id, nameKey, tagKey, accent, mount, unmount }` и одна строка в
-`js/games/registry.js` (см. [ADR-0008](docs/adr/0008-katalog-igr-reestr-hash-routing.md)).
+`#/hypercube`, `#/snake` и `#/hypermaze` — игры. Добавить игру: модуль
+`js/games/<id>/` с дескриптором `{ id, nameKey, tagKey, accent, mount, unmount }`
+и одна строка в `js/games/registry.js`
+(см. [ADR-0008](docs/adr/0008-katalog-igr-reestr-hash-routing.md)).
 
 Запуск: `npm install`, затем `npm run dev` — сборка и сервер берутся из Vite.
-Логика покрыта тестами: `npm test` (ядро, ИИ, матч, сетевая сессия, змейка).
+Логика покрыта тестами: `npm test` (ядро, ИИ, матч, сетевая сессия, змейка,
+лабиринт).
 
 ## License
 

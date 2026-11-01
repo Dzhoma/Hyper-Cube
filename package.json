@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/game.test.js tests/ai.test.js tests/match.test.js tests/session.test.js tests/snake.test.js",
+    "test": "node --test tests/game.test.js tests/ai.test.js tests/match.test.js tests/session.test.js tests/snake.test.js tests/maze.test.js",
     "lint": "oxlint .",
     "format": "oxfmt ."
   },

@@ -6,7 +6,8 @@
  */
 import hypercube from './hypercube/index.js';
 import snake from './snake/index.js';
+import hypermaze from './hypermaze/index.js';
 
-const registry = [hypercube, snake];
+const registry = [hypercube, snake, hypermaze];
 
 export default registry;

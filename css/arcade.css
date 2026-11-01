@@ -77,6 +77,18 @@
     0 0 24px rgba(255, 43, 214, 0.22),
     inset 0 0 20px rgba(255, 43, 214, 0.05);
 }
+.card[data-accent='lime'] .card-name,
+.card[data-accent='lime'] .card-play {
+  color: var(--c-lime);
+  text-shadow: 0 0 12px rgba(127, 255, 0, 0.5);
+}
+.card[data-accent='lime']:hover,
+.card[data-accent='lime']:focus-visible {
+  border-color: var(--c-lime);
+  box-shadow:
+    0 0 24px rgba(127, 255, 0, 0.22),
+    inset 0 0 20px rgba(127, 255, 0, 0.05);
+}
 
 /* кнопка возврата в аркаду */
 .menu-head .btn-exit {
@@ -110,4 +122,86 @@
   text-shadow:
     0 0 10px rgba(255, 43, 214, 0.8),
     0 0 40px rgba(255, 43, 214, 0.4);
+}
+
+/* ---------- гиперлабиринт ---------- */
+
+#screen-hypermaze {
+  align-items: center;
+  gap: 18px;
+  padding: 24px 16px;
+}
+#hm-canvas {
+  width: min(584px, 94vw);
+  height: auto;
+  border: 1px solid rgba(127, 255, 0, 0.3);
+  box-shadow:
+    0 0 30px rgba(127, 255, 0, 0.1),
+    inset 0 0 30px rgba(127, 255, 0, 0.04);
+  background: #04040a;
+  touch-action: none;
+}
+#hm-overlay-title {
+  color: var(--c-lime);
+  text-shadow:
+    0 0 10px rgba(127, 255, 0, 0.8),
+    0 0 40px rgba(127, 255, 0, 0.4);
+}
+.hm-pads {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.hm-pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.hm-pad-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--c-dim);
+}
+.hm-pad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 38px);
+  grid-template-rows: repeat(3, 32px);
+  gap: 4px;
+}
+.hm-key {
+  border: 1px solid var(--line);
+  background: rgba(0, 240, 255, 0.03);
+  color: var(--c-text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease-out,
+    color 0.15s ease-out,
+    box-shadow 0.15s ease-out;
+}
+.hm-key:hover,
+.hm-key:focus-visible {
+  border-color: var(--c-lime);
+  color: var(--c-lime);
+  box-shadow: 0 0 10px rgba(127, 255, 0, 0.25);
+  outline: none;
+}
+.hm-key:active {
+  background: rgba(127, 255, 0, 0.12);
+}
+/* крест: вверх / влево / вправо / вниз вокруг пустого центра */
+.hm-key:nth-child(1) {
+  grid-area: 1 / 2;
+}
+.hm-key:nth-child(2) {
+  grid-area: 2 / 1;
+}
+.hm-key:nth-child(3) {
+  grid-area: 2 / 3;
+}
+.hm-key:nth-child(4) {
+  grid-area: 3 / 2;
 }
